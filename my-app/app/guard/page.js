@@ -14,6 +14,7 @@ function GuardPanelContent() {
   const [msg, setMsg] = useState(null);
   const [stats, setStats] = useState(null);
   const [name, setName] = useState('');
+  const [error, setError] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -23,8 +24,16 @@ function GuardPanelContent() {
   const fetchStats = async () => {
     try {
       const res = await fetchAuth(`${API_BASE}/dashboard/stats`);
-      if (res.ok) setStats(await safeJson(res));
-    } catch (err) { console.error(err); }
+      if (res.ok) {
+        setStats(await safeJson(res));
+        setError(null);
+      } else {
+        throw new Error("Server response error");
+      }
+    } catch (err) { 
+      console.error(err); 
+      setError("Connection to security server lost.");
+    }
   };
 
   usePullToRefresh(fetchStats);
@@ -59,8 +68,8 @@ function GuardPanelContent() {
   };
 
   return (
-    <div className="guard-layout">
-      <nav className="guard-side-nav">
+    <div className="dashboard-layout">
+      <nav className="side-nav">
         <h1 className="nav-logo">{sysConfig.appName}</h1>
         <div className="user-welcome">
           <span className="text-secondary" style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase' }}>Duty Guard</span>
@@ -72,7 +81,9 @@ function GuardPanelContent() {
         <button className="logout-btn-glass" onClick={handleLogout}>Sign Out</button>
       </nav>
 
-      <main className="guard-main">
+      <main className="main-content">
+        {error && <div className="apple-badge danger" style={{ width: '100%', padding: '1rem', borderRadius: '15px', justifyContent: 'center' }}>⚠️ {error}</div>}
+        
         {stats && (
           <div className="dash-stats-grid">
             <GlassCard className="mini-stat">

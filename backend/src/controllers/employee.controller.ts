@@ -42,7 +42,12 @@ export const getEmployees = async (req: Request, res: Response) => {
   try {
     const { activeOnly } = req.query;
     const filter = activeOnly === 'true' ? { isActive: true } : {};
-    const employees = await Employee.find(filter).sort({ name: 1 });
+    
+    // SECURITY: If not authenticated as Admin, only return basic info
+    const isAdmin = req.user && req.user.role === 'ADMIN';
+    const projection = isAdmin ? {} : { name: 1, department: 1, _id: 1 };
+
+    const employees = await Employee.find(filter, projection).sort({ name: 1 });
     res.json(employees);
   } catch (error: any) {
     res.status(500).json({ error: error.message });

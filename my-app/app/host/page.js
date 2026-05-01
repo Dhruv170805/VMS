@@ -16,6 +16,7 @@ function HostDashboardContent() {
   const [tab, setTab] = useState('pending');
   const [hostId, setHostId] = useState(null);
   const [name, setName] = useState('');
+  const [error, setError] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -30,8 +31,14 @@ function HostDashboardContent() {
       if (res.ok) {
         const data = await safeJson(res);
         if (data) setVisitors(data);
+        setError(null);
+      } else {
+        throw new Error("Server error");
       }
-    } catch (err) { console.error(err); }
+    } catch (err) { 
+      console.error(err); 
+      setError("Unable to sync with front desk.");
+    }
     finally { setLoading(false); }
   };
 
@@ -79,13 +86,20 @@ function HostDashboardContent() {
   const active = visitors.filter(v => ['GATE_IN', 'MEET_IN', 'MEET_OVER', 'APPROVED'].includes(v.status));
   const history = visitors.filter(v => ['GATE_OUT', 'REJECTED'].includes(v.status));
 
+  const EmptyState = ({ icon, title }) => (
+    <div style={{ textAlign: 'center', padding: '5rem 2rem' }}>
+      <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>{icon}</div>
+      <p className="text-secondary" style={{ fontWeight: 600 }}>{title}</p>
+    </div>
+  );
+
   return (
-    <div className="host-layout">
-      <nav className="host-side-nav">
+    <div className="dashboard-layout">
+      <nav className="side-nav">
         <div className="nav-logo">{sysConfig.appName}</div>
-        <div className="user-welcome" style={{ marginBottom: '2rem' }}>
-          <span className="text-secondary" style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase' }}>Welcome back,</span>
-          <h2 style={{ margin: '0.2rem 0', fontSize: '1.8rem', fontWeight: 900 }}>{name}</h2>
+        <div className="user-welcome">
+          <span className="text-secondary" style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase' }}>Host Duty</span>
+          <h2>{name}</h2>
         </div>
         <div className="nav-group">
           <button className={tab === 'pending' ? 'active' : ''} onClick={() => { haptic('light'); setTab('pending'); }}>Inbox ({pending.length})</button>
@@ -95,17 +109,14 @@ function HostDashboardContent() {
         <button className="logout-btn-glass" onClick={handleLogout}>Sign Out</button>
       </nav>
 
-      <main className="host-main">
+      <main className="main-content">
+        {error && <div className="apple-badge danger" style={{ width: '100%', padding: '1rem', borderRadius: '15px', justifyContent: 'center' }}>⚠️ {error}</div>}
+        
         <GlassCard className="main-glass">
           {tab === 'pending' && (
             <div className="host-view" style={{ width: '100%' }}>
               <h3>Visitor Requests</h3>
-              {pending.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '5rem 2rem' }}>
-                  <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📥</div>
-                  <p className="text-secondary" style={{ fontWeight: 600 }}>Your inbox is empty</p>
-                </div>
-              ) : (
+              {pending.length === 0 ? <EmptyState icon="📥" title="Your inbox is empty" /> : (
                 <div className="apple-list" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
                   {pending.map(v => (
                     <SwipeableItem 
@@ -114,7 +125,7 @@ function HostDashboardContent() {
                       onSwipeLeft={() => handleAction(v._id, 'REJECTED')}
                     >
                       <div className="glass" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', padding: '1.2rem', width: '100%' }}>
-                        <img src={v.photo_base64} style={{ width: '60px', height: '60px', borderRadius: '15px', objectFit: 'cover' }} />
+                        <img src={v.photo_base64} style={{ width: '60px', height: '60px', borderRadius: '15px', objectFit: 'cover' }} alt="" />
                         <div style={{ flex: 1 }}>
                           <strong style={{ display: 'block', fontSize: '1.1rem' }}>{v.name}</strong>
                           <span className="text-secondary" style={{ fontSize: '0.9rem' }}>{v.company} • {v.purpose}</span>
@@ -135,12 +146,7 @@ function HostDashboardContent() {
             <div className="host-view" style={{ width: '100%' }}>
               <h3>Live Status</h3>
               <div className="apple-list" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {active.length === 0 ? (
-                  <div style={{ textAlign: 'center', padding: '5rem 2rem' }}>
-                    <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>👥</div>
-                    <p className="text-secondary" style={{ fontWeight: 600 }}>No visitors currently on site</p>
-                  </div>
-                ) : active.map(v => (
+                {active.length === 0 ? <EmptyState icon="👥" title="No visitors currently on site" /> : active.map(v => (
                   <div key={v._id} className="glass" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', padding: '1.2rem' }}>
                     <div style={{ flex: 1 }}>
                       <strong style={{ display: 'block', fontSize: '1.1rem' }}>{v.name}</strong>
@@ -165,12 +171,7 @@ function HostDashboardContent() {
             <div className="host-view" style={{ width: '100%' }}>
               <h3>History</h3>
               <div className="apple-list" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                {history.length === 0 ? (
-                  <div style={{ textAlign: 'center', padding: '5rem 2rem' }}>
-                    <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📜</div>
-                    <p className="text-secondary" style={{ fontWeight: 600 }}>No historical records</p>
-                  </div>
-                ) : history.map(v => (
+                {history.length === 0 ? <EmptyState icon="📜" title="No historical records" /> : history.map(v => (
                   <div key={v._id} className="glass" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', padding: '1.2rem', opacity: 0.7 }}>
                     <div style={{ flex: 1 }}>
                       <strong style={{ display: 'block' }}>{v.name}</strong>

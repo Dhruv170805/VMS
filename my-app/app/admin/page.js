@@ -7,7 +7,7 @@ import SwipeableItem from '@/components/SwipeableItem';
 import Dashboard from '@/components/Dashboard';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { haptic, usePullToRefresh } from '@/utils/hooks';
-import { API_BASE, fetchAuth } from '@/utils/config';
+import { API_BASE, fetchAuth, safeJson } from '@/utils/config';
 import { useConfig } from '@/context/ConfigContext';
 
 function AdminPanelContent() {
@@ -22,6 +22,7 @@ function AdminPanelContent() {
   const [file, setFile] = useState(null);
   const [settings, setSettings] = useState({});
   const [adminName, setAdminName] = useState('');
+  const [error, setError] = useState(null);
 
   useEffect(() => { 
     setSettings(sysConfig); 
@@ -64,8 +65,10 @@ function AdminPanelContent() {
         }
       }
       if (blRes.ok) setBlacklist(await safeJson(blRes));
+      setError(null);
     } catch (err) { 
       console.error("Admin Fetch Error:", err); 
+      setError("Server unreachable. Please check connection.");
     }
   };
 
@@ -121,8 +124,8 @@ function AdminPanelContent() {
   );
 
   return (
-    <div className="admin-layout">
-      <nav className="admin-side-nav">
+    <div className="dashboard-layout">
+      <nav className="side-nav">
         <h1 className="nav-logo">{sysConfig.appName}</h1>
         <div className="user-welcome">
           <span className="text-secondary" style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase' }}>Administrator</span>
@@ -141,7 +144,8 @@ function AdminPanelContent() {
         <button className="logout-btn-glass" onClick={handleLogout}>Sign Out</button>
       </nav>
 
-      <main className="admin-main">
+      <main className="main-content">
+        {error && <div className="apple-badge danger" style={{ width: '100%', padding: '1rem', borderRadius: '15px', justifyContent: 'center' }}>⚠️ {error}</div>}
         {tab === 'dashboard' && <Dashboard />}
 
         {tab === 'settings' && (
@@ -279,9 +283,10 @@ function AdminPanelContent() {
               <div className="upload-box-glass">
                 <input type="file" onChange={e => setFile(e.target.files[0])} className="apple-file" />
                 <button onClick={async () => {
+                  if (!file) return alert("Select a file first");
                   const fd = new FormData(); fd.append('file', file);
-                  await fetchAuth(`${API_BASE}/employees/upload`, { method: 'POST', body: fd });
-                  fetchData();
+                  const res = await fetchAuth(`${API_BASE}/employees/upload`, { method: 'POST', body: fd });
+                  if (res.ok) fetchData();
                 }} className="apple-btn-primary">Update Database</button>
               </div>
             </GlassCard>
@@ -342,7 +347,7 @@ function AdminPanelContent() {
                     {logs.map(l => (
                       <tr key={l._id}>
                         <td>{new Date(l.timestamp).toLocaleString()}</td>
-                        <td>{l.visitor_id?.name || 'System'}</td>
+                        <td>{l.visitor_id?.name || 'SYSTEM CORE'}</td>
                         <td>{l.event}</td>
                         <td>{l.actor}</td>
                       </tr>

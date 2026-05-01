@@ -8,6 +8,30 @@ function DigitalPass({ pass, onBack }) {
   const { config } = useConfig();
   const [currentPass, setCurrentPass] = useState(pass);
   const [polling, setPolling] = useState(pass.status === 'PENDING');
+  const [timeLeft, setTimeLeft] = useState('');
+  const [isExpired, setIsExpired] = useState(false);
+
+  useEffect(() => {
+    const calcTime = () => {
+      const exp = new Date(currentPass.validity.to);
+      exp.setHours(23, 59, 59);
+      const diff = exp - new Date();
+      
+      if (diff <= 0) {
+        setTimeLeft('EXPIRED');
+        setIsExpired(true);
+        return;
+      }
+
+      const hours = Math.floor(diff / 3600000);
+      const mins = Math.floor((diff % 3600000) / 60000);
+      setTimeLeft(`${hours}h ${mins}m remaining`);
+    };
+
+    calcTime();
+    const t = setInterval(calcTime, 60000);
+    return () => clearInterval(t);
+  }, [currentPass.validity.to]);
 
   useEffect(() => {
     if (!polling) return;
