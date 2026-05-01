@@ -59,14 +59,14 @@ function AdminPanelContent() {
 
       const blRes = await fetchAuth(`${API_BASE}/blacklist`);
       if (blRes.ok) setBlacklist(await blRes.json());
-    } catch (err) { 
-      console.error("Admin Fetch Error:", err); 
+    } catch (err) {
+      console.error("Admin Fetch Error:", err);
     }
   };
 
   usePullToRefresh(fetchData);
 
-  useEffect(() => { 
+  useEffect(() => {
     fetchData();
     const interval = setInterval(fetchData, 10000);
     return () => clearInterval(interval);
@@ -136,22 +136,22 @@ function AdminPanelContent() {
                 <h4>Branding</h4>
                 <div className="apple-input-group-vertical">
                   <label>App Name</label>
-                  <input type="text" value={settings.appName || ''} onChange={e => setSettings({...settings, appName: e.target.value})} />
+                  <input type="text" value={settings.appName || ''} onChange={e => setSettings({ ...settings, appName: e.target.value })} />
                   <label>Subtitle</label>
-                  <input type="text" value={settings.appSubtitle || ''} onChange={e => setSettings({...settings, appSubtitle: e.target.value})} />
+                  <input type="text" value={settings.appSubtitle || ''} onChange={e => setSettings({ ...settings, appSubtitle: e.target.value })} />
                   <label>Company Name</label>
-                  <input type="text" value={settings.companyName || ''} onChange={e => setSettings({...settings, companyName: e.target.value})} />
+                  <input type="text" value={settings.companyName || ''} onChange={e => setSettings({ ...settings, companyName: e.target.value })} />
                 </div>
               </div>
               <div className="form-section-glass">
                 <h4>System Logic</h4>
                 <div className="apple-input-group-vertical">
                   <label>Visitor Code Prefix</label>
-                  <input type="text" value={settings.visitorCodePrefix || ''} onChange={e => setSettings({...settings, visitorCodePrefix: e.target.value})} />
+                  <input type="text" value={settings.visitorCodePrefix || ''} onChange={e => setSettings({ ...settings, visitorCodePrefix: e.target.value })} />
                   <label>Contact Email</label>
-                  <input type="email" value={settings.contactEmail || ''} onChange={e => setSettings({...settings, contactEmail: e.target.value})} />
+                  <input type="email" value={settings.contactEmail || ''} onChange={e => setSettings({ ...settings, contactEmail: e.target.value })} />
                   <label style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
-                    <input type="checkbox" checked={settings.allowPublicRegistration ?? true} onChange={e => setSettings({...settings, allowPublicRegistration: e.target.checked})} style={{ width: 'auto' }} />
+                    <input type="checkbox" checked={settings.allowPublicRegistration ?? true} onChange={e => setSettings({ ...settings, allowPublicRegistration: e.target.checked })} style={{ width: 'auto' }} />
                     Allow Public Registration
                   </label>
                 </div>
@@ -206,10 +206,10 @@ function AdminPanelContent() {
                       <td><code>{v.visitor_code}</code></td>
                       <td><span className={`status-badge-glass ${v.status}`}>{v.status}</span></td>
                       <td>
-                        <select 
-                          className="apple-select" 
+                        <select
+                          className="apple-select"
                           style={{ background: 'rgba(0,0,0,0.05)', border: 'none', padding: '6px 12px', borderRadius: '8px', fontWeight: 600 }}
-                          value={v.status} 
+                          value={v.status}
                           onChange={(e) => updateStatus(v._id, e.target.value)}
                         >
                           <option value="APPROVED">Approved</option>

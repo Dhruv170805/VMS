@@ -7,11 +7,7 @@ import apiRoutes from './routes/api';
 
 dotenv.config();
 
-const app = express();
-const PORT = process.env.PORT;
-if (!PORT) {
-  throw new Error('⚠️ PORT not found in environment variables.');
-}
+const PORT = process.env.PORT || 5001;
 
 // Connect to Database
 connectDB();

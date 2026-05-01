@@ -12,7 +12,7 @@
   --glass-highlight: rgba(255, 255, 255, 0.8);
   --blur: blur(60px) saturate(250%);
   --radius: 32px;
-  
+
   /* Motion Tokens */
   --ease-liquid: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
@@ -20,12 +20,12 @@
   --duration-mid: 280ms;
   --duration-slow: 500ms;
   --transition: all 0.35s var(--ease-liquid);
-  
+
   --apple-blue: #0071e3;
   --apple-blue-rgb: 0, 113, 227;
   --apple-text: #1d1d1f;
-  --apple-text-muted: #86868b;
-  
+  --apple-text-muted: #6b7280;
+
   /* Layout Safe Areas */
   --safe-padding: 2.5rem;
 }
@@ -37,13 +37,21 @@
 }
 
 /* Hide Scrollbars */
-::-webkit-scrollbar { width: 0px; height: 0px; background: transparent; }
-* { scrollbar-width: none; -ms-overflow-style: none; }
+::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+  background: transparent;
+}
+
+* {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
 
 body {
   margin: 0;
   padding: 0;
-  background: #f5f5f7;
+  background: #fbfbfd;
   color: var(--apple-text);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   overflow-x: hidden;
@@ -55,23 +63,31 @@ body {
   position: fixed;
   inset: 0;
   z-index: -1;
-  background-color: #f5f5f7;
-  background-image: 
-    radial-gradient(circle at 15% 50%, rgba(200, 225, 255, 0.8), transparent 50%),
-    radial-gradient(circle at 85% 30%, rgba(220, 210, 255, 0.8), transparent 50%),
-    radial-gradient(circle at 50% 80%, rgba(235, 245, 255, 0.8), transparent 50%),
-    radial-gradient(circle at 80% 90%, rgba(255, 230, 240, 0.8), transparent 50%),
-    radial-gradient(circle at 20% 10%, rgba(240, 245, 255, 0.8), transparent 50%);
-  filter: blur(80px);
-  animation: meshMove 25s ease-in-out infinite alternate;
-  opacity: 0.9;
+  background-color: #fbfbfd;
+  background-image:
+    radial-gradient(at 0% 0%, hsla(202, 100%, 91%, 1) 0, transparent 50%),
+    radial-gradient(at 50% 0%, hsla(202, 100%, 85%, 1) 0, transparent 50%),
+    radial-gradient(at 100% 0%, hsla(202, 100%, 80%, 1) 0, transparent 50%),
+    radial-gradient(at 100% 50%, hsla(271, 100%, 90%, 1) 0, transparent 50%),
+    radial-gradient(at 100% 100%, hsla(202, 100%, 85%, 1) 0, transparent 50%),
+    radial-gradient(at 0% 100%, hsla(202, 100%, 91%, 1) 0, transparent 50%),
+    radial-gradient(at 0% 50%, hsla(202, 100%, 88%, 1) 0, transparent 50%);
+  filter: blur(100px);
+  animation: meshMove 20s ease-in-out infinite alternate;
 }
 
 @keyframes meshMove {
-  0% { transform: scale(1) translate(0, 0); }
-  33% { transform: scale(1.05) translate(3%, -2%); }
-  66% { transform: scale(1.1) translate(-2%, 4%); }
-  100% { transform: scale(1) translate(-1%, -1%); }
+  0% {
+    transform: scale(1) translate(0, 0);
+  }
+
+  50% {
+    transform: scale(1.1) translate(2%, 2%);
+  }
+
+  100% {
+    transform: scale(1) translate(-1%, 1%);
+  }
 }
 
 /* SPATIAL ENGINE */
@@ -83,9 +99,15 @@ body {
   align-items: flex-start;
 }
 
-.app-main { width: 100%; height: 100%; }
+.app-main {
+  width: 100%;
+  height: 100%;
+}
 
-.home-layout, .login-layout, .visitor-layout, .pass-layout {
+.home-layout,
+.login-layout,
+.visitor-layout,
+.pass-layout {
   width: 100%;
   min-height: 100vh;
   display: flex;
@@ -96,14 +118,15 @@ body {
 }
 
 /* TRUE LIQUID GLASS CARD */
-.glass-card, .glass {
+.glass-card,
+.glass {
   position: relative;
   background: rgba(255, 255, 255, 0.4);
   backdrop-filter: var(--blur);
   -webkit-backdrop-filter: var(--blur);
   border-radius: var(--radius);
   border: 1px solid rgba(255, 255, 255, 0.6);
-  box-shadow: 
+  box-shadow:
     0 10px 40px rgba(0, 0, 0, 0.05),
     inset 0 1px 1px rgba(255, 255, 255, 0.8);
   padding: 3.5rem;
@@ -114,43 +137,45 @@ body {
   transform: translateY(calc(var(--active-tilt, 0) * -12px)) scale(calc(1 + var(--active-tilt, 0) * 0.03)) rotateX(var(--tilt-x, 0deg)) rotateY(var(--tilt-y, 0deg));
 }
 
-.glass-card::before, .glass::before {
+.glass-card::before,
+.glass::before {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
   padding: 1.5px;
-  background: linear-gradient(
-    135deg,
-    rgba(255, 255, 255, 0.8),
-    rgba(255, 255, 255, 0.1) 40%,
-    rgba(255, 255, 255, 0.1) 60%,
-    rgba(255, 255, 255, 0.8)
-  );
+  background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.8),
+      rgba(255, 255, 255, 0.1) 40%,
+      rgba(255, 255, 255, 0.1) 60%,
+      rgba(255, 255, 255, 0.8));
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
 }
 
-.glass-card::after, .glass::after {
+.glass-card::after,
+.glass::after {
   content: "";
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: radial-gradient(
-    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
-    rgba(255, 255, 255, 0.15) 0%,
-    transparent 60%
-  );
+  background: radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+      rgba(255, 255, 255, 0.15) 0%,
+      transparent 60%);
   pointer-events: none;
   z-index: 2;
 }
 
-.wide-glass { max-width: 1100px; }
+.wide-glass {
+  max-width: 1100px;
+}
 
 /* ADMIN & DASHBOARD LAYOUT */
-.admin-layout, .host-layout, .guard-layout {
+.admin-layout,
+.host-layout,
+.guard-layout {
   display: grid;
   grid-template-columns: 320px 1fr;
   height: 100vh;
@@ -160,7 +185,9 @@ body {
   overflow: hidden;
 }
 
-.admin-side-nav, .host-side-nav, .guard-side-nav {
+.admin-side-nav,
+.host-side-nav,
+.guard-side-nav {
   background: rgba(255, 255, 255, 0.4);
   backdrop-filter: var(--blur);
   border-radius: var(--radius);
@@ -171,7 +198,9 @@ body {
   gap: 2rem;
 }
 
-.admin-main, .host-main, .guard-main {
+.admin-main,
+.host-main,
+.guard-main {
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -203,7 +232,9 @@ body {
   background: #0077ed;
 }
 
-.apple-btn-primary:active { transform: scale(0.97); }
+.apple-btn-primary:active {
+  transform: scale(0.97);
+}
 
 .apple-btn-secondary {
   background: rgba(0, 0, 0, 0.05);
@@ -215,7 +246,9 @@ body {
   transition: all 0.3s var(--ease-liquid);
 }
 
-.apple-btn-secondary:hover { background: rgba(0, 0, 0, 0.08); }
+.apple-btn-secondary:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
 
 /* DIGITAL PASS - GOD LEVEL */
 .vms-card-studio {
@@ -226,7 +259,7 @@ body {
   width: 100%;
   max-width: 480px;
   border: 1px solid rgba(255, 255, 255, 0.8);
-  box-shadow: 
+  box-shadow:
     0 40px 100px rgba(0, 0, 0, 0.1),
     inset 0 1px 1px white;
   position: relative;
@@ -240,20 +273,23 @@ body {
   left: -50%;
   width: 200%;
   height: 200%;
-  background: linear-gradient(
-    45deg,
-    transparent 45%,
-    rgba(255, 255, 255, 0.4) 50%,
-    transparent 55%
-  );
+  background: linear-gradient(45deg,
+      transparent 45%,
+      rgba(255, 255, 255, 0.4) 50%,
+      transparent 55%);
   transform: rotate(-45deg);
   animation: hologram 6s linear infinite;
   pointer-events: none;
 }
 
 @keyframes hologram {
-  from { transform: translateX(-100%) rotate(-45deg); }
-  to { transform: translateX(100%) rotate(-45deg); }
+  from {
+    transform: translateX(-100%) rotate(-45deg);
+  }
+
+  to {
+    transform: translateX(100%) rotate(-45deg);
+  }
 }
 
 .card-top {
@@ -298,7 +334,11 @@ body {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 }
 
-.v-photo-studio img { width: 100%; height: 100%; object-fit: cover; }
+.v-photo-studio img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 
 .v-qr-studio {
   background: white;
@@ -360,7 +400,10 @@ body {
   margin-bottom: 4px;
 }
 
-.v-time { font-weight: 700; font-size: 0.95rem; }
+.v-time {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
 
 .card-bottom {
   margin-top: 3rem;
@@ -488,9 +531,19 @@ body {
   border: 2px solid white;
 }
 
-.item-info { flex: 1; }
-.item-info strong { display: block; font-size: 1.1rem; }
-.item-info small { color: var(--apple-text-muted); font-size: 0.9rem; }
+.item-info {
+  flex: 1;
+}
+
+.item-info strong {
+  display: block;
+  font-size: 1.1rem;
+}
+
+.item-info small {
+  color: var(--apple-text-muted);
+  font-size: 0.9rem;
+}
 
 /* TABLE REFINEMENT */
 .apple-table-container {
@@ -526,8 +579,15 @@ body {
   border-bottom: 1px solid rgba(255, 255, 255, 0.4);
 }
 
-.apple-table td:first-child { border-left: 1px solid rgba(255, 255, 255, 0.4); border-radius: 20px 0 0 20px; }
-.apple-table td:last-child { border-right: 1px solid rgba(255, 255, 255, 0.4); border-radius: 0 20px 20px 0; }
+.apple-table td:first-child {
+  border-left: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 20px 0 0 20px;
+}
+
+.apple-table td:last-child {
+  border-right: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 0 20px 20px 0;
+}
 
 .apple-table tr:hover td {
   background: rgba(255, 255, 255, 0.5);
@@ -569,7 +629,8 @@ body {
   gap: 16px;
 }
 
-.apple-input-group-vertical input, .apple-input-group-vertical select {
+.apple-input-group-vertical input,
+.apple-input-group-vertical select {
   background: rgba(255, 255, 255, 0.5);
   border: 1px solid rgba(0, 0, 0, 0.05);
   padding: 16px 20px;
@@ -633,8 +694,15 @@ body {
 }
 
 @keyframes slideInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* TABLE UPGRADE */
@@ -674,14 +742,25 @@ body {
   gap: 6px;
 }
 
-.apple-badge.success { background: rgba(52, 199, 89, 0.15); color: #248a3d; }
-.apple-badge.danger { background: rgba(255, 59, 48, 0.15); color: #ff3b30; }
-.apple-badge.secondary { background: rgba(0, 0, 0, 0.05); color: #666; }
+.apple-badge.success {
+  background: rgba(52, 199, 89, 0.15);
+  color: #248a3d;
+}
+
+.apple-badge.danger {
+  background: rgba(255, 59, 48, 0.15);
+  color: #ff3b30;
+}
+
+.apple-badge.secondary {
+  background: rgba(0, 0, 0, 0.05);
+  color: #666;
+}
 
 /* DASHBOARD MINI STATS */
 .mini-stat {
   border: 1px solid rgba(255, 255, 255, 0.5) !important;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.03) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.03) !important;
 }
 
 .mini-stat .value {
@@ -690,43 +769,19 @@ body {
   -webkit-text-fill-color: transparent;
 }
 
-/* STATUS BADGES - PREMIUM GLASS */
-.status-badge-glass {
-  padding: 6px 14px;
-  border-radius: 10px;
-  font-size: 0.75rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  backdrop-filter: blur(4px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+.error-text {
+  color: #ff3b30;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-top: 1rem;
 }
-
-.status-badge-glass.PENDING { color: #f59e0b; background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.2); }
-.status-badge-glass.APPROVED { color: #10b981; background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2); }
-.status-badge-glass.GATE_IN { color: #3b82f6; background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.2); }
-.status-badge-glass.MEET_IN { color: #8b5cf6; background: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.2); }
-.status-badge-glass.MEET_OVER { color: #6b7280; background: rgba(107, 114, 128, 0.1); border-color: rgba(107, 114, 128, 0.2); }
-.status-badge-glass.GATE_OUT { color: var(--apple-text); background: rgba(0, 0, 0, 0.05); }
-.status-badge-glass.REJECTED { color: #ff3b30; background: rgba(255, 59, 48, 0.1); border-color: rgba(255, 59, 48, 0.2); }
-
-/* MISC APPLE UI */
-.apple-alert-info {
-  background: rgba(0, 113, 227, 0.08);
-  padding: 1.5rem 2rem;
-  border-radius: 20px;
-  border: 1px solid rgba(0, 113, 227, 0.1);
-  font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.error-text { color: #ff3b30; font-weight: 600; font-size: 0.9rem; margin-top: 1rem; }
 
 /* MOBILE RESPONSIVENESS */
 @media (max-width: 1024px) {
-  .admin-layout, .host-layout, .guard-layout {
+
+  .admin-layout,
+  .host-layout,
+  .guard-layout {
     grid-template-columns: 1fr;
     height: auto;
     overflow: visible;
@@ -734,7 +789,9 @@ body {
     gap: 16px;
   }
 
-  .admin-side-nav, .host-side-nav, .guard-side-nav {
+  .admin-side-nav,
+  .host-side-nav,
+  .guard-side-nav {
     padding: 1.5rem;
     gap: 1.5rem;
   }
@@ -751,7 +808,9 @@ body {
     font-size: 0.9rem;
   }
 
-  .admin-main, .host-main, .guard-main {
+  .admin-main,
+  .host-main,
+  .guard-main {
     overflow-y: visible;
     padding-right: 0;
   }
@@ -762,7 +821,8 @@ body {
     --safe-padding: 1.5rem;
   }
 
-  .glass-card, .glass {
+  .glass-card,
+  .glass {
     padding: 2rem;
     border-radius: 24px;
   }
@@ -797,7 +857,8 @@ body {
     font-size: 1.8rem;
   }
 
-  .apple-btn-primary, .apple-btn-secondary {
+  .apple-btn-primary,
+  .apple-btn-secondary {
     padding: 12px 20px;
     font-size: 0.9rem;
   }
@@ -818,7 +879,9 @@ body {
 }
 
 @media (max-width: 480px) {
-  .glass-card, .glass {
+
+  .glass-card,
+  .glass {
     padding: 1.5rem;
   }
 
@@ -831,7 +894,8 @@ body {
     font-size: 0.8rem !important;
   }
 
-  .apple-table td, .apple-table th {
+  .apple-table td,
+  .apple-table th {
     padding: 12px 10px;
     font-size: 0.8rem;
   }
@@ -843,8 +907,19 @@ body {
 }
 
 @media print {
-  .no-print { display: none; }
-  .no-print-shadow { box-shadow: none !important; }
-  body { background: white !important; }
-  .mesh-gradient { display: none; }
+  .no-print {
+    display: none;
+  }
+
+  .no-print-shadow {
+    box-shadow: none !important;
+  }
+
+  body {
+    background: white !important;
+  }
+
+  .mesh-gradient {
+    display: none;
+  }
 }
