@@ -138,10 +138,10 @@ function HostDashboardContent() {
       <main className="main-content">
         {error && <div className="apple-badge danger" style={{ width: '100%', padding: '1rem', borderRadius: '15px', justifyContent: 'center' }}>⚠️ {error}</div>}
         
-        <GlassCard className="main-glass">
+        <GlassCard className="main-glass wide-glass">
           {tab === 'pending' && (
             <div className="host-view" style={{ width: '100%' }}>
-              <h3>Visitor Requests</h3>
+              <h3 style={{ marginBottom: '2rem' }}>Visitor Requests</h3>
               {pending.length === 0 ? <EmptyState icon="📥" title="Your inbox is empty" /> : (
                 <div className="apple-list" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
                   {pending.map(v => (
@@ -150,15 +150,15 @@ function HostDashboardContent() {
                       onSwipeRight={() => handleAction(v._id, 'APPROVED')}
                       onSwipeLeft={() => handleAction(v._id, 'REJECTED')}
                     >
-                      <div className="glass" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', padding: '1.2rem', width: '100%' }}>
-                        <img src={v.photo_base64} style={{ width: '60px', height: '60px', borderRadius: '15px', objectFit: 'cover' }} alt="" />
+                      <div className="glass" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', padding: '1.5rem', width: '100%' }}>
+                        <img src={v.photo_base64} style={{ width: '70px', height: '70px', borderRadius: '20px', objectFit: 'cover', border: '3px solid white', boxShadow: '0 8px 20px rgba(0,0,0,0.1)' }} alt="" />
                         <div style={{ flex: 1 }}>
-                          <strong style={{ display: 'block', fontSize: '1.1rem' }}>{v.name}</strong>
-                          <span className="text-secondary" style={{ fontSize: '0.9rem' }}>{v.company} • {v.purpose}</span>
+                          <strong style={{ display: 'block', fontSize: '1.2rem', fontWeight: 800 }}>{v.name}</strong>
+                          <span className="text-secondary" style={{ fontSize: '0.95rem', fontWeight: 600 }}>{v.company} • {v.purpose}</span>
                         </div>
-                        <div className="item-actions" style={{ display: 'flex', gap: '0.5rem' }}>
-                          <button className="apple-btn-sm" style={{ background: '#34c759', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '10px', fontWeight: 700 }} onClick={() => handleAction(v._id, 'APPROVED')}>Allow</button>
-                          <button className="apple-btn-sm" style={{ background: '#ff3b30', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '10px', fontWeight: 700 }} onClick={() => handleAction(v._id, 'REJECTED')}>Deny</button>
+                        <div className="item-actions" style={{ display: 'flex', gap: '1rem' }}>
+                          <button className="apple-btn-success" onClick={() => handleAction(v._id, 'APPROVED')}>Allow</button>
+                          <button className="apple-btn-danger" onClick={() => handleAction(v._id, 'REJECTED')}>Deny</button>
                         </div>
                       </div>
                     </SwipeableItem>
@@ -170,22 +170,22 @@ function HostDashboardContent() {
 
           {tab === 'active' && (
             <div className="host-view" style={{ width: '100%' }}>
-              <h3>Live Status</h3>
-              <div className="apple-list" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              <h3 style={{ marginBottom: '2rem' }}>Live Status</h3>
+              <div className="apple-list" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                 {active.length === 0 ? <EmptyState icon="👥" title="No visitors currently on site" /> : active.map(v => (
-                  <div key={v._id} className="glass" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', padding: '1.2rem' }}>
+                  <div key={v._id} className="glass" style={{ display: 'flex', alignItems: 'center', gap: '2rem', padding: '2rem' }}>
                     <div style={{ flex: 1 }}>
-                      <strong style={{ display: 'block', fontSize: '1.1rem' }}>{v.name}</strong>
-                      <span className={`status-badge-glass ${v.status}`} style={{ marginTop: '0.5rem', display: 'inline-block' }}>{v.status}</span>
+                      <strong style={{ display: 'block', fontSize: '1.3rem', fontWeight: 800, marginBottom: '0.5rem' }}>{v.name}</strong>
+                      <span className={`status-badge-glass ${v.status}`} style={{ display: 'inline-block' }}>{v.status}</span>
                       {v.status === 'MEET_IN' && v.visit_timestamps.meet_in_at && (
-                        <div className="meeting-timer">
+                        <div className="meeting-timer" style={{ marginLeft: '1rem' }}>
                           <span>⏱️</span> {Math.max(0, Math.floor((now - new Date(v.visit_timestamps.meet_in_at)) / 60000))}m {Math.floor((now - new Date(v.visit_timestamps.meet_in_at)) / 1000) % 60}s
                         </div>
                       )}
                     </div>
                     <div className="item-actions">
                       {v.status === 'GATE_IN' && <button className="apple-btn-primary" onClick={() => updateStatus(v._id, 'MEET_IN')}>Start Meeting</button>}
-                      {v.status === 'MEET_IN' && <button className="apple-btn-primary" onClick={() => updateStatus(v._id, 'MEET_OVER')}>End Meeting</button>}
+                      {v.status === 'MEET_IN' && <button className="apple-btn-primary" style={{ background: '#1d1d1f' }} onClick={() => updateStatus(v._id, 'MEET_OVER')}>End Meeting</button>}
                     </div>
                   </div>
                 ))}
@@ -195,15 +195,15 @@ function HostDashboardContent() {
 
           {tab === 'history' && (
             <div className="host-view" style={{ width: '100%' }}>
-              <h3>History</h3>
+              <h3 style={{ marginBottom: '2rem' }}>Meeting History</h3>
               <div className="apple-list" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 {history.length === 0 ? <EmptyState icon="📜" title="No historical records" /> : history.map(v => (
-                  <div key={v._id} className="glass" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', padding: '1.2rem', opacity: 0.7 }}>
+                  <div key={v._id} className="glass" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', padding: '1.5rem', opacity: 0.8 }}>
                     <div style={{ flex: 1 }}>
-                      <strong style={{ display: 'block' }}>{v.name}</strong>
-                      <span className="text-secondary" style={{ fontSize: '0.8rem' }}>{new Date(v.created_at).toLocaleDateString()} • {new Date(v.created_at).toLocaleTimeString()}</span>
+                      <strong style={{ display: 'block', fontSize: '1.1rem', fontWeight: 700 }}>{v.name}</strong>
+                      <span className="text-secondary" style={{ fontSize: '0.85rem', fontWeight: 600 }}>{new Date(v.created_at).toLocaleDateString()} • {new Date(v.created_at).toLocaleTimeString()}</span>
                     </div>
-                    <span className="status-badge-glass">{v.status}</span>
+                    <span className={`status-badge-glass ${v.status}`}>{v.status}</span>
                   </div>
                 ))}
               </div>
