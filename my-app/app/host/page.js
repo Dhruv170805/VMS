@@ -77,39 +77,42 @@ function HostDashboardContent() {
 
   return (
     <div className="host-layout">
-      <header className="host-header-glass">
-        <div className="user-welcome">
-          <span>Welcome,</span>
-          <h2>{name}</h2>
+      <nav className="host-side-nav">
+        <div className="nav-logo">HOST</div>
+        <div className="user-welcome" style={{ marginBottom: '2rem' }}>
+          <span className="text-secondary" style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase' }}>Welcome back,</span>
+          <h2 style={{ margin: '0.2rem 0', fontSize: '1.8rem', fontWeight: 900 }}>{name}</h2>
+        </div>
+        <div className="nav-group">
+          <button className={tab === 'pending' ? 'active' : ''} onClick={() => { haptic('light'); setTab('pending'); }}>Inbox ({pending.length})</button>
+          <button className={tab === 'active' ? 'active' : ''} onClick={() => { haptic('light'); setTab('active'); }}>Live Status</button>
+          <button className={tab === 'history' ? 'active' : ''} onClick={() => { haptic('light'); setTab('history'); }}>Meeting History</button>
         </div>
         <button className="logout-btn-glass" onClick={handleLogout}>Sign Out</button>
-      </header>
+      </nav>
 
-      <div className="host-content">
-        <div className="host-tabs-glass">
-          <button className={tab === 'pending' ? 'active' : ''} onClick={() => { haptic('light'); setTab('pending'); }}>Inbox ({pending.length})</button>
-          <button className={tab === 'active' ? 'active' : ''} onClick={() => { haptic('light'); setTab('active'); }}>Active Meetings</button>
-          <button className={tab === 'history' ? 'active' : ''} onClick={() => { haptic('light'); setTab('history'); }}>Past Visits</button>
-        </div>
-
+      <main className="host-main">
         <GlassCard className="main-glass">
           {tab === 'pending' && (
-            <div className="host-view">
+            <div className="host-view" style={{ width: '100%' }}>
               <h3>Visitor Requests</h3>
-              {pending.length === 0 ? <p className="empty-text">No pending requests.</p> : (
-                <div className="apple-list">
+              {pending.length === 0 ? <p className="text-secondary" style={{ textAlign: 'center', padding: '3rem' }}>No pending requests at the moment.</p> : (
+                <div className="apple-list" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
                   {pending.map(v => (
                     <SwipeableItem 
                       key={v._id}
                       onSwipeRight={() => handleAction(v._id, 'APPROVED')}
                       onSwipeLeft={() => handleAction(v._id, 'REJECTED')}
                     >
-                      <div className="apple-list-item">
-                        <img src={v.photo_base64} className="list-avatar" />
-                        <div className="item-info"><strong>{v.name}</strong><small>{v.company} • {v.purpose}</small></div>
-                        <div className="item-actions">
-                          <button className="apple-btn-sm success" onClick={() => handleAction(v._id, 'APPROVED')}>Allow</button>
-                          <button className="apple-btn-sm danger" onClick={() => handleAction(v._id, 'REJECTED')}>Deny</button>
+                      <div className="glass" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', padding: '1.2rem', width: '100%' }}>
+                        <img src={v.photo_base64} style={{ width: '60px', height: '60px', borderRadius: '15px', objectFit: 'cover' }} />
+                        <div style={{ flex: 1 }}>
+                          <strong style={{ display: 'block', fontSize: '1.1rem' }}>{v.name}</strong>
+                          <span className="text-secondary" style={{ fontSize: '0.9rem' }}>{v.company} • {v.purpose}</span>
+                        </div>
+                        <div className="item-actions" style={{ display: 'flex', gap: '0.5rem' }}>
+                          <button className="apple-btn-sm" style={{ background: '#34c759', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '10px', fontWeight: 700 }} onClick={() => handleAction(v._id, 'APPROVED')}>Allow</button>
+                          <button className="apple-btn-sm" style={{ background: '#ff3b30', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '10px', fontWeight: 700 }} onClick={() => handleAction(v._id, 'REJECTED')}>Deny</button>
                         </div>
                       </div>
                     </SwipeableItem>
@@ -120,15 +123,18 @@ function HostDashboardContent() {
           )}
 
           {tab === 'active' && (
-            <div className="host-view">
+            <div className="host-view" style={{ width: '100%' }}>
               <h3>Live Status</h3>
-              <div className="apple-list">
-                {active.map(v => (
-                  <div key={v._id} className="apple-list-item">
-                    <div className="item-info"><strong>{v.name}</strong><span className={`apple-badge-status ${v.status}`}>{v.status}</span></div>
+              <div className="apple-list" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                {active.length === 0 ? <p className="text-secondary" style={{ textAlign: 'center', padding: '3rem' }}>No active visitors in premise.</p> : active.map(v => (
+                  <div key={v._id} className="glass" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', padding: '1.2rem' }}>
+                    <div style={{ flex: 1 }}>
+                      <strong style={{ display: 'block', fontSize: '1.1rem' }}>{v.name}</strong>
+                      <span className={`status-badge-glass ${v.status}`} style={{ marginTop: '0.5rem', display: 'inline-block' }}>{v.status}</span>
+                    </div>
                     <div className="item-actions">
-                      {v.status === 'GATE_IN' && <button className="apple-btn-sm primary" onClick={() => updateStatus(v._id, 'MEET_IN')}>Meeting Started</button>}
-                      {v.status === 'MEET_IN' && <button className="apple-btn-sm primary" onClick={() => updateStatus(v._id, 'MEET_OVER')}>Meeting Over</button>}
+                      {v.status === 'GATE_IN' && <button className="apple-btn-primary" onClick={() => updateStatus(v._id, 'MEET_IN')}>Meeting Started</button>}
+                      {v.status === 'MEET_IN' && <button className="apple-btn-primary" onClick={() => updateStatus(v._id, 'MEET_OVER')}>Meeting Over</button>}
                     </div>
                   </div>
                 ))}
@@ -137,20 +143,23 @@ function HostDashboardContent() {
           )}
 
           {tab === 'history' && (
-            <div className="host-view">
+            <div className="host-view" style={{ width: '100%' }}>
               <h3>History</h3>
-              <div className="apple-list">
+              <div className="apple-list" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                 {history.map(v => (
-                  <div key={v._id} className="apple-list-item dimmed">
-                    <div className="item-info"><strong>{v.name}</strong><small>{new Date(v.created_at).toLocaleDateString()}</small></div>
-                    <span className={`apple-badge-status ${v.status}`}>{v.status}</span>
+                  <div key={v._id} className="glass" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', padding: '1.2rem', opacity: 0.7 }}>
+                    <div style={{ flex: 1 }}>
+                      <strong style={{ display: 'block' }}>{v.name}</strong>
+                      <span className="text-secondary" style={{ fontSize: '0.8rem' }}>{new Date(v.created_at).toLocaleDateString()} • {new Date(v.created_at).toLocaleTimeString()}</span>
+                    </div>
+                    <span className="status-badge-glass">{v.status}</span>
                   </div>
                 ))}
               </div>
             </div>
           )}
         </GlassCard>
-      </div>
+      </main>
     </div>
   );
 }

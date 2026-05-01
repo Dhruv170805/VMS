@@ -53,45 +53,51 @@ function GuardPanelContent() {
 
   return (
     <div className="guard-layout">
-      <div className="guard-header-glass">
-        <h1 className="logo-text">Security Console</h1>
+      <nav className="guard-side-nav">
+        <h1 className="nav-logo">GUARD</h1>
+        <div className="nav-group">
+          <button className="active">Access Control</button>
+        </div>
         <button className="logout-btn-glass" onClick={handleLogout}>Sign Out</button>
-      </div>
-      {stats && (
-        <div className="guard-stats-row">
-          <GlassCard className="guard-stat in">
-            <span className="label">Current In</span>
-            <strong className="value">{stats.GATE_IN + stats.MEET_IN + stats.MEET_OVER}</strong>
-          </GlassCard>
-          <GlassCard className="guard-stat out">
-            <span className="label">Total Out</span>
-            <strong className="value">{stats.GATE_OUT}</strong>
-          </GlassCard>
-          <GlassCard className="guard-stat today">
-            <span className="label">Total Visits</span>
-            <strong className="value">{stats.TOTAL}</strong>
-          </GlassCard>
-        </div>
-      )}
+      </nav>
 
-      <GlassCard className="gate-control-glass main-glass">
-        <h3>Gate Access</h3>
-        <p className="text-secondary">Scan visitor QR or enter code manually</p>
-        <div className="guard-input-group">
-          <input 
-            type="text" 
-            placeholder="AWAITING INPUT..." 
-            value={input} 
-            onChange={e => setInput(e.target.value.toUpperCase())} 
-            className="big-gate-input"
-          />
-          <div className="gate-actions">
-            <button onClick={() => handleGate('checkin')} className="apple-btn-success flex-1">ENTRY (IN)</button>
-            <button onClick={() => handleGate('checkout')} className="apple-btn-danger flex-1">EXIT (OUT)</button>
+      <main className="guard-main">
+        {stats && (
+          <div className="dash-stats-grid">
+            <GlassCard className="mini-stat">
+              <span className="text-secondary">Current In-Premise</span>
+              <strong className="value">{stats.GATE_IN + stats.MEET_IN + stats.MEET_OVER}</strong>
+            </GlassCard>
+            <GlassCard className="mini-stat">
+              <span className="text-secondary">Total Today</span>
+              <strong className="value">{stats.TOTAL}</strong>
+            </GlassCard>
+            <GlassCard className="mini-stat">
+              <span className="text-secondary">Checked Out</span>
+              <strong className="value">{stats.GATE_OUT}</strong>
+            </GlassCard>
           </div>
-        </div>
-        {msg && <div className={`apple-alert ${msg.type}`}>{msg.text}</div>}
-      </GlassCard>
+        )}
+
+        <GlassCard className="main-glass">
+          <h3>Gate Access Terminal</h3>
+          <p className="text-secondary">Scan visitor QR or enter code manually</p>
+          <div className="apple-input-group-vertical" style={{ marginTop: '2rem' }}>
+            <input 
+              type="text" 
+              placeholder="VMS-CODE or TOKEN..." 
+              value={input} 
+              onChange={e => setInput(e.target.value.toUpperCase())} 
+              style={{ fontSize: '1.5rem', textAlign: 'center', padding: '1.5rem' }}
+            />
+            <div className="form-actions-glass">
+              <button onClick={() => handleGate('checkin')} className="apple-btn-success flex-1">MARK ENTRY</button>
+              <button onClick={() => handleGate('checkout')} className="apple-btn-danger flex-1">MARK EXIT</button>
+            </div>
+          </div>
+          {msg && <div className={`apple-alert-${msg.type}`} style={{ marginTop: '1.5rem', padding: '1rem', borderRadius: '12px', textAlign: 'center', background: msg.type === 'success' ? 'rgba(52, 199, 89, 0.1)' : 'rgba(255, 59, 48, 0.1)', color: msg.type === 'success' ? '#248a3d' : '#ff3b30' }}>{msg.text}</div>}
+        </GlassCard>
+      </main>
     </div>
   );
 }

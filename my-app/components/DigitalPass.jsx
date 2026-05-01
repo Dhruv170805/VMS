@@ -37,14 +37,14 @@ function DigitalPass({ pass, onBack }) {
     <div className="pass-layout">
       <motion.div 
         className="pass-container-apple"
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
+        initial={{ scale: 0.9, opacity: 0, y: 40 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 260, damping: 20 }}
       >
-        <div className="vms-card-studio no-print-shadow">
+        <div className="vms-card-studio glass">
           <div className="card-top">
             <div className="logo-studio">{config.appName}</div>
-            <div className="status-badge-glass">{currentPass.status}</div>
+            <div className={`status-badge-glass ${currentPass.status}`}>{currentPass.status}</div>
           </div>
           
           <div className="card-main">
@@ -52,9 +52,11 @@ function DigitalPass({ pass, onBack }) {
               <div className="v-photo-studio"><img src={currentPass.photo_base64} /></div>
               <div className="v-qr-studio">
                 {currentPass.token ? (
-                  <QRCodeCanvas value={currentPass.token} size={120} level="H" bgColor="transparent" fgColor="#1d1d1f" />
+                  <QRCodeCanvas value={currentPass.token} size={110} level="H" bgColor="transparent" fgColor="#1d1d1f" />
                 ) : (
-                  <div className="qr-status-text">{currentPass.status}</div>
+                  <div className="qr-status-text" style={{ fontSize: '0.7rem', fontWeight: 800, color: '#6b7280', textAlign: 'center' }}>
+                    {currentPass.status === 'PENDING' ? 'AWAITING APPROVAL' : 'SECURE TOKEN'}
+                  </div>
                 )}
               </div>
             </div>
@@ -66,31 +68,35 @@ function DigitalPass({ pass, onBack }) {
               <div className="info-grid-studio">
                 <div className="info-item"><span>Purpose</span><p>{currentPass.purpose}</p></div>
                 <div className="info-item"><span>Company</span><p>{currentPass.company || 'N/A'}</p></div>
-                <div className="info-item"><span>Visiting</span><p>{currentPass.host_name}</p></div>
+                <div className="info-item"><span>Host</span><p>{currentPass.host_name}</p></div>
                 <div className="info-item"><span>Dept</span><p>{currentPass.host_dept}</p></div>
               </div>
 
               <div className="validity-studio">
-                <div className="v-label">VALIDITY PERIOD</div>
-                <div className="v-time">{new Date(currentPass.validity.from).toLocaleDateString()} — {new Date(currentPass.validity.to).toLocaleDateString()}</div>
+                <div className="v-label">IDENTITY VALID UNTIL</div>
+                <div className="v-time">{new Date(currentPass.validity.to).toLocaleDateString()} • 23:59 PM</div>
               </div>
             </div>
           </div>
 
           <div className="card-bottom">
-            <span>ISSUED BY {config.companyName.toUpperCase()} {config.appName}</span>
+            <span>OFFICIAL DIGITAL IDENTITY PASS • {config.companyName.toUpperCase()}</span>
           </div>
         </div>
 
-        <div className="pass-controls no-print">
+        <div className="pass-controls no-print" style={{ display: 'flex', gap: '1rem', marginTop: '2.5rem', width: '100%', maxWidth: '480px' }}>
           {['APPROVED', 'GATE_IN', 'MEET_IN', 'MEET_OVER'].includes(currentPass.status) && (
-            <button onClick={handlePrint} className="apple-btn-primary">Print Identity Pass</button>
+            <button onClick={handlePrint} className="apple-btn-primary flex-1">Print Pass</button>
           )}
-          <button onClick={onBack} className="apple-btn-secondary">Dismiss</button>
+          <button onClick={onBack} className="apple-btn-secondary flex-1">Dismiss</button>
         </div>
 
         {currentPass.status === 'PENDING' && (
-          <div className="apple-alert-info">🕒 Awaiting verification from <strong>{currentPass.host_name}</strong>. Please stay on this page.</div>
+          <div className="apple-alert-info" style={{ width: '100%', maxWidth: '480px' }}>
+            <span style={{ fontSize: '1.2rem', display: 'block', marginBottom: '0.5rem' }}>⏳</span>
+            Awaiting verification from <strong>{currentPass.host_name}</strong>.<br/>
+            <small className="text-secondary">This page will update automatically once approved.</small>
+          </div>
         )}
       </motion.div>
     </div>

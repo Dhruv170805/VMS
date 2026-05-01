@@ -5,8 +5,10 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import GlassCard from '@/components/GlassCard';
 import { API_BASE } from '@/utils/config';
+import { useConfig } from '@/context/ConfigContext';
 
 export default function LoginPage() {
+  const { config: sysConfig } = useConfig();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -36,20 +38,22 @@ export default function LoginPage() {
 
   return (
     <div className="login-layout">
-      <GlassCard className="login-card main-glass">
-        <div className="login-header">
-          <div className="logo-small">VMS</div>
-          <h2>Staff Sign In</h2>
+      <GlassCard className="main-glass" style={{ maxWidth: '440px' }}>
+        <div className="login-header" style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+          <h1 className="main-logo-text" style={{ fontSize: '3.5rem' }}>{sysConfig.appName}</h1>
+          <p className="text-secondary" style={{ fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2px', marginTop: '0.5rem' }}>Staff Portal</p>
         </div>
-        <form onSubmit={handleLogin}>
-          <div className="apple-input-group">
+        <form onSubmit={handleLogin} style={{ width: '100%' }}>
+          <div className="apple-input-group-vertical">
             <input type="email" placeholder="Email Address" required value={email} onChange={e => setEmail(e.target.value)} />
             <input type="password" placeholder="Password" required value={password} onChange={e => setPassword(e.target.value)} />
           </div>
-          <button type="submit" className="apple-btn-primary full-width">Sign In</button>
+          <button type="submit" className="apple-btn-primary full-width" style={{ marginTop: '1.5rem' }}>Secure Sign In</button>
         </form>
-        {error && <p className="error-text">{error}</p>}
-        <Link href="/" className="back-link-glass">← Back to Reception</Link>
+        {error && <p className="error-text" style={{ textAlign: 'center' }}>{error}</p>}
+        <div style={{ marginTop: '2.5rem', textAlign: 'center' }}>
+          <Link href="/" className="back-link-glass" style={{ color: 'var(--apple-blue)', fontWeight: 700, textDecoration: 'none' }}>← Back to Reception</Link>
+        </div>
       </GlassCard>
     </div>
   );

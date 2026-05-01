@@ -14,11 +14,15 @@ export async function PATCH(req, { params }) {
     updateData[`visit_timestamps.${timestampField}`] = new Date();
 
     const visitor = await Visitor.findByIdAndUpdate(id, updateData, { new: true });
-    if (!visitor) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    if (!visitor) return NextResponse.json({ error: 'Visitor not found' }, { status: 404 });
 
-    await new Log({ visitor_id: visitor._id, event: status, actor: 'SYSTEM' }).save();
+    await new Log({
+      visitor_id: visitor._id,
+      event: status,
+      actor: 'ADMIN' // Simplified for now, could be dynamic based on token
+    }).save();
 
-    return NextResponse.json(visitor);
+    return NextResponse.json({ message: `Status updated to ${status}`, visitor });
   } catch (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
