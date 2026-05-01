@@ -1,6 +1,6 @@
 const getApiBase = () => {
-  // Use environment variable if provided, otherwise default to relative /api
-  const base = process.env.NEXT_PUBLIC_API_BASE || '/api';
+  // Use environment variable if provided, otherwise default to the unified Express backend
+  const base = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:5001/api';
   
   // Ensure it starts with / or http
   let formatted = base;
