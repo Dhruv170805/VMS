@@ -15,10 +15,15 @@ import { uploadEmployees, getEmployees, toggleEmployeeStatus } from '../controll
 import { login, register } from '../controllers/auth.controller';
 import { getLogs } from '../controllers/log.controller';
 import { addToBlacklist, getBlacklist, removeFromBlacklist } from '../controllers/blacklist.controller';
+import { getConfig, updateConfig } from '../controllers/config.controller';
 import { authMiddleware } from '../middleware/auth.middleware';
 
 const router = Router();
 const upload = multer({ storage: multer.memoryStorage() });
+
+// System Config (Public for initialization, Update protected)
+router.get('/config', getConfig);
+router.patch('/config', authMiddleware(['ADMIN']), updateConfig);
 
 // Auth Routes
 router.post('/auth/login', login);

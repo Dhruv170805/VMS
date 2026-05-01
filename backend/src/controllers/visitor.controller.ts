@@ -5,10 +5,15 @@ import Blacklist from '../models/Blacklist';
 import { VisitorRegistrationSchema, VisitorApprovalSchema } from '../validation/visitor.schema';
 import jwt from 'jsonwebtoken';
 
+import SystemConfig from '../models/SystemConfig';
+
 export const registerVisitor = async (req: Request, res: Response) => {
   try {
     console.log(`📝 Registering new visitor: ${req.body.name} (${req.body.phone})`);
     const validatedData = VisitorRegistrationSchema.parse(req.body);
+    
+    // Fetch System Config
+    const config = await SystemConfig.findOne() || new SystemConfig();
     
     // Check Blacklist
     const isBlacklisted = await Blacklist.findOne({
@@ -23,10 +28,10 @@ export const registerVisitor = async (req: Request, res: Response) => {
       return res.status(403).json({ error: 'Access Denied: Your details are blacklisted.' });
     }
 
-    // Generate unique visitor code: VMS-YYYYMMDD-XXXX
+    // Generate unique visitor code: PREFIX-YYYYMMDD-XXXX
     const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
     const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
-    const visitor_code = `VMS-${dateStr}-${randomStr}`;
+    const visitor_code = `${config.visitorCodePrefix}-${dateStr}-${randomStr}`;
 
     const visitor = new Visitor({
       ...validatedData,

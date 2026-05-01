@@ -1,5 +1,5 @@
 const getApiBase = () => {
-  const base = process.env.NEXT_PUBLIC_API_BASE || 'http://127.0.0.1:5001/api';
+  const base = process.env.NEXT_PUBLIC_API_BASE || '/api';
   return base.endsWith('/') ? base.slice(0, -1) : base;
 };
 

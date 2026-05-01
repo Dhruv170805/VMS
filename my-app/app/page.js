@@ -9,8 +9,10 @@ import GlassCard from '@/components/GlassCard';
 import DigitalPass from '@/components/DigitalPass';
 import { haptic } from '@/utils/hooks';
 import { API_BASE } from '@/utils/config';
+import { useConfig } from '@/context/ConfigContext';
 
 export default function Home() {
+  const { config } = useConfig();
   const [mode, setMode] = useState('visitor'); // 'visitor', 'staff'
   const [trackCode, setTrackCode] = useState('');
   const [visitorPass, setVisitorPass] = useState(null);
@@ -95,8 +97,8 @@ export default function Home() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
         >
-          <h1 className="main-logo-text">VMS</h1>
-          <p className="subtitle">Smart Visitor System</p>
+          <h1 className="main-logo-text">{config.appName}</h1>
+          <p className="subtitle">{config.appSubtitle}</p>
         </motion.div>
 
         <div className="segmented-control-container">

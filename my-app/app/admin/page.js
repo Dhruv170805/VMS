@@ -8,8 +8,10 @@ import Dashboard from '@/components/Dashboard';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { haptic, usePullToRefresh } from '@/utils/hooks';
 import { API_BASE, fetchAuth } from '@/utils/config';
+import { useConfig } from '@/context/ConfigContext';
 
 function AdminPanelContent() {
+  const { config: sysConfig, refreshConfig } = useConfig();
   const [pending, setPending] = useState([]);
   const [activeVisits, setActiveVisits] = useState([]);
   const [employees, setEmployees] = useState([]);
@@ -18,7 +20,24 @@ function AdminPanelContent() {
   const [allHistory, setAllHistory] = useState([]);
   const [tab, setTab] = useState('dashboard');
   const [file, setFile] = useState(null);
+  const [settings, setSettings] = useState({});
+
+  useEffect(() => { setSettings(sysConfig); }, [sysConfig]);
+
   const router = useRouter();
+
+  const handleUpdateConfig = async () => {
+    haptic('heavy');
+    const res = await fetchAuth(`${API_BASE}/config`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(settings)
+    });
+    if (res.ok) {
+      haptic('success');
+      refreshConfig();
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -95,12 +114,40 @@ function AdminPanelContent() {
           <button className={tab === 'employees' ? 'active' : ''} onClick={() => { haptic('light'); setTab('employees'); }}>Staff</button>
           <button className={tab === 'blacklist' ? 'active' : ''} onClick={() => { haptic('light'); setTab('blacklist'); }}>Blacklist</button>
           <button className={tab === 'logs' ? 'active' : ''} onClick={() => { haptic('light'); setTab('logs'); }}>Audit Logs</button>
+          <button className={tab === 'settings' ? 'active' : ''} onClick={() => { haptic('light'); setTab('settings'); }}>Settings</button>
         </div>
         <button className="logout-btn-glass" onClick={handleLogout}>Sign Out</button>
       </nav>
 
       <main className="admin-main">
         {tab === 'dashboard' && <Dashboard />}
+
+        {tab === 'settings' && (
+          <GlassCard className="main-glass">
+            <h3>Application Settings</h3>
+            <div className="advanced-form-glass">
+              <div className="form-section-glass">
+                <h4>Branding</h4>
+                <div className="apple-input-group-vertical">
+                  <label>App Name</label>
+                  <input type="text" value={settings.appName || ''} onChange={e => setSettings({...settings, appName: e.target.value})} />
+                  <label>Subtitle</label>
+                  <input type="text" value={settings.appSubtitle || ''} onChange={e => setSettings({...settings, appSubtitle: e.target.value})} />
+                  <label>Company Name</label>
+                  <input type="text" value={settings.companyName || ''} onChange={e => setSettings({...settings, companyName: e.target.value})} />
+                </div>
+              </div>
+              <div className="form-section-glass">
+                <h4>System Logic</h4>
+                <div className="apple-input-group-vertical">
+                  <label>Visitor Code Prefix</label>
+                  <input type="text" value={settings.visitorCodePrefix || ''} onChange={e => setSettings({...settings, visitorCodePrefix: e.target.value})} />
+                </div>
+              </div>
+              <button onClick={handleUpdateConfig} className="apple-btn-primary">Save System Changes</button>
+            </div>
+          </GlassCard>
+        )}
 
         {tab === 'pending' && (
           <GlassCard className="main-glass">
