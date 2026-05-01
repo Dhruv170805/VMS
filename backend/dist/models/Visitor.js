@@ -64,7 +64,7 @@ const VisitorSchema = new mongoose_1.Schema({
         default: 'PENDING',
         index: true
     },
-    timestamps: {
+    visit_timestamps: {
         approved_at: { type: Date },
         gate_in_at: { type: Date },
         meet_in_at: { type: Date },

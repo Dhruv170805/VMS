@@ -16,7 +16,7 @@ export interface IVisitor extends Document {
         to: Date;
     };
     status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'GATE_IN' | 'MEET_IN' | 'MEET_OVER' | 'GATE_OUT';
-    timestamps: {
+    visit_timestamps: {
         approved_at?: Date;
         gate_in_at?: Date;
         meet_in_at?: Date;

@@ -88,7 +88,7 @@ const approveVisitor = async (req, res) => {
         const { status } = visitor_schema_1.VisitorApprovalSchema.parse(req.body);
         const updateData = { status };
         if (status === 'APPROVED') {
-            updateData['timestamps.approved_at'] = new Date();
+            updateData['visit_timestamps.approved_at'] = new Date();
         }
         const visitor = await Visitor_1.default.findByIdAndUpdate(id, updateData, { new: true }).populate('host_id');
         if (!visitor) {
@@ -101,7 +101,10 @@ const approveVisitor = async (req, res) => {
         }).save();
         let qrCode = null;
         if (status === 'APPROVED') {
-            qrCode = jsonwebtoken_1.default.sign({ visitorId: visitor._id, exp: Math.floor(visitor.validity.to.getTime() / 1000) }, process.env.JWT_SECRET);
+            const expiresIn = Math.floor((visitor.validity.to.getTime() - Date.now()) / 1000);
+            if (expiresIn > 0) {
+                qrCode = jsonwebtoken_1.default.sign({ visitorId: visitor._id }, process.env.JWT_SECRET, { expiresIn });
+            }
         }
         res.json({ message: `Visitor ${status.toLowerCase()} successfully`, visitor, qrCode });
     }
@@ -146,8 +149,11 @@ const getVisitorByCode = async (req, res) => {
             return res.status(404).json({ error: 'Visitor not found' });
         let token = null;
         // Allow token retrieval if visitor is approved or already inside
-        if (!['PENDING', 'REJECTED'].includes(visitor.status)) {
-            token = jsonwebtoken_1.default.sign({ visitorId: visitor._id, exp: Math.floor(visitor.validity.to.getTime() / 1000) }, process.env.JWT_SECRET);
+        if (['APPROVED', 'GATE_IN', 'MEET_IN', 'MEET_OVER'].includes(visitor.status)) {
+            const expiresIn = Math.floor((visitor.validity.to.getTime() - Date.now()) / 1000);
+            if (expiresIn > 0) {
+                token = jsonwebtoken_1.default.sign({ visitorId: visitor._id }, process.env.JWT_SECRET, { expiresIn });
+            }
         }
         res.json({ visitor, token });
     }
@@ -162,7 +168,7 @@ const updateVisitorStatus = async (req, res) => {
         const { status } = req.body; // e.g., MEET_IN, MEET_OVER
         const timestampField = status.toLowerCase() + '_at';
         const updateData = { status };
-        updateData[`timestamps.${timestampField}`] = new Date();
+        updateData[`visit_timestamps.${timestampField}`] = new Date();
         const visitor = await Visitor_1.default.findByIdAndUpdate(id, updateData, { new: true });
         if (!visitor)
             return res.status(404).json({ error: 'Visitor not found' });

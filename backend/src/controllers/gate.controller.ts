@@ -19,7 +19,7 @@ export const checkIn = async (req: Request, res: Response) => {
     if (visitor.status !== 'APPROVED') return res.status(400).json({ error: 'Visitor not approved or already at gate' });
 
     visitor.status = 'GATE_IN';
-    visitor.timestamps.gate_in_at = new Date();
+    visitor.visit_timestamps.gate_in_at = new Date();
     await visitor.save();
 
     await new Log({
@@ -50,7 +50,7 @@ export const checkOut = async (req: Request, res: Response) => {
     if (visitor.status !== 'MEET_OVER') return res.status(400).json({ error: 'Meeting not marked over yet' });
 
     visitor.status = 'GATE_OUT';
-    visitor.timestamps.gate_out_at = new Date();
+    visitor.visit_timestamps.gate_out_at = new Date();
     await visitor.save();
 
     await new Log({

@@ -4,7 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const cors_1 = __importDefault(require("cors"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const morgan_1 = __importDefault(require("morgan"));
 const db_1 = __importDefault(require("./config/db"));
@@ -19,11 +18,20 @@ if (!PORT) {
 (0, db_1.default)();
 // Middleware
 app.use((0, morgan_1.default)('dev')); // HTTP request logging
-app.use((0, cors_1.default)({
-    origin: true, // Dynamically allow the requesting origin
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    credentials: true
-}));
+// Robust CORS Middleware for Safari/Local Development
+app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    if (origin) {
+        res.setHeader('Access-Control-Allow-Origin', origin);
+    }
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, Accept, Origin');
+    if (req.method === 'OPTIONS') {
+        return res.status(200).end();
+    }
+    next();
+});
 app.use(express_1.default.json({ limit: '10mb' })); // Support base64 images
 // Routes
 app.use('/api', api_1.default);
