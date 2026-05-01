@@ -55,7 +55,8 @@ export const registerVisitor = async (req: Request, res: Response) => {
     res.status(201).json({ message: 'Visitor registered successfully', visitorId: visitor._id, visitor_code });
   } catch (error: any) {
     console.error(`❌ Registration Error: ${error.message}`);
-    res.status(400).json({ error: error.errors || error.message });
+    const errorMessage = error.errors ? error.errors.map((e: any) => `${e.path.join('.')}: ${e.message}`).join(', ') : error.message;
+    res.status(400).json({ error: errorMessage });
   }
 };
 
@@ -126,7 +127,8 @@ export const approveVisitor = async (req: Request, res: Response) => {
 
     res.json({ message: `Visitor ${status.toLowerCase()} successfully`, visitor, qrCode });
   } catch (error: any) {
-    res.status(400).json({ error: error.errors || error.message });
+    const errorMessage = error.errors ? error.errors.map((e: any) => `${e.path.join('.')}: ${e.message}`).join(', ') : error.message;
+    res.status(400).json({ error: errorMessage });
   }
 };
 

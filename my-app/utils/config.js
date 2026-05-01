@@ -1,5 +1,5 @@
 const getApiBase = () => {
-  let base = process.env.NEXT_PUBLIC_API_BASE || '/api';
+  let base = process.env.NEXT_PUBLIC_API_BASE || 'http://localhost:5000/api';
   if (!base.startsWith('/') && !base.startsWith('http')) base = '/' + base;
   return base.endsWith('/') ? base.slice(0, -1) : base;
 };

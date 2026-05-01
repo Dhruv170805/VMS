@@ -32,9 +32,9 @@ export const register = async (req: Request, res: Response) => {
   try {
     const { name, email, password, role, setupKey } = req.body;
     
-    // Bug 15 Fix: Protect public registration with a simple key check
-    if (setupKey !== process.env.SETUP_KEY && process.env.NODE_ENV === 'production') {
-      return res.status(403).json({ error: 'Forbidden: Registration is restricted' });
+    // SECURITY: Mandatory setupKey check for all environments to prevent brute-force
+    if (setupKey !== process.env.SETUP_KEY) {
+      return res.status(403).json({ error: 'Forbidden: Invalid setup key. Administrative registration restricted.' });
     }
 
     const user = new User({ name, email, password, role });
