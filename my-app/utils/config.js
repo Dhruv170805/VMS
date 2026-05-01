@@ -1,23 +1,26 @@
 const getApiBase = () => {
   // Use environment variable if provided, otherwise default to relative /api
-  let base = process.env.NEXT_PUBLIC_API_BASE || '/api';
+  const base = process.env.NEXT_PUBLIC_API_BASE || '/api';
   
+  // Ensure it starts with / or http
+  let formatted = base;
   if (!base.startsWith('/') && !base.startsWith('http')) {
-    base = '/' + base;
+    formatted = '/' + base;
   }
   
   // Trim trailing slash
-  return base.endsWith('/') ? base.slice(0, -1) : base;
+  return formatted.endsWith('/') ? formatted.slice(0, -1) : formatted;
 };
 
 export const API_BASE = getApiBase();
 
 export const fetchAuth = (url, options = {}) => {
-  const token = localStorage.getItem('token');
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
   return fetch(url, {
     ...options,
     headers: {
       ...options.headers,
+      'Content-Type': 'application/json',
       ...(token ? { 'Authorization': `Bearer ${token}` } : {})
     }
   });
@@ -27,10 +30,18 @@ export const safeJson = async (res) => {
   try {
     const text = await res.text();
     if (!text) return null;
-    return JSON.parse(text);
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      // Encountered HTML or malformed string (e.g. Vercel 404 page)
+      if (text.includes('<!DOCTYPE html>') || text.includes('<html')) {
+        return { error: `Server returned an error page (${res.status}). Check backend connection.` };
+      }
+      throw e;
+    }
   } catch (err) {
-    console.error("Failed to parse JSON response:", err);
-    return { error: "Invalid server response. Ensure API is running." };
+    console.error("SafeJson Error:", err);
+    return { error: "Network error or invalid server response." };
   }
 };
 
