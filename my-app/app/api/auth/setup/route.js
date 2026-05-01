@@ -38,6 +38,11 @@ export async function POST(req) {
       const exists = await User.findOne({ email: u.email });
       if (!exists) {
         await new User({ ...u, password: passwordHash }).save();
+      } else {
+        exists.password = passwordHash;
+        exists.role = u.role;
+        if (u.employeeId) exists.employeeId = u.employeeId;
+        await exists.save();
       }
     }
 
