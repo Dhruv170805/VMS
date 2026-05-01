@@ -5,9 +5,11 @@ import { useRouter } from 'next/navigation';
 import GlassCard from '@/components/GlassCard';
 import DigitalPass from '@/components/DigitalPass';
 import CameraCapture from '@/components/CameraCapture';
+import { useConfig } from '@/context/ConfigContext';
 import { API_BASE, VISIT_PURPOSES, ID_TYPES } from '@/utils/config';
 
 export default function VisitorPage() {
+  const { config: sysConfig } = useConfig();
   const [step, setStep] = useState(1);
   const [employees, setEmployees] = useState([]);
   const [formData, setFormData] = useState({
