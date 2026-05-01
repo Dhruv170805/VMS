@@ -153,18 +153,26 @@ export default function Dashboard() {
                 <BarChart data={stats.trendData}>
                   <defs>
                     <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#3b82f6" stopOpacity={1} />
-                      <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.6} />
+                      <stop offset="0%" stopColor="var(--apple-blue)" stopOpacity={1} />
+                      <stop offset="100%" stopColor="var(--apple-blue)" stopOpacity={0.4} />
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
-                  <XAxis dataKey="hour" axisLine={false} tickLine={false} tick={{ fontSize: 11, fontWeight: 700 }} />
-                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fontWeight: 700 }} />
+                  <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="rgba(0,0,0,0.04)" />
+                  <XAxis dataKey="hour" axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 800, fill: 'var(--apple-text-muted)' }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 800, fill: 'var(--apple-text-muted)' }} />
                   <Tooltip 
-                    cursor={{ fill: 'rgba(0,0,0,0.02)' }}
-                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', backdropFilter: 'blur(10px)' }}
+                    cursor={{ fill: 'rgba(0,0,0,0.02)', radius: 10 }}
+                    contentStyle={{ 
+                      borderRadius: '24px', 
+                      border: '1.5px solid rgba(255,255,255,0.7)', 
+                      boxShadow: '0 20px 40px rgba(0,0,0,0.1)', 
+                      backdropFilter: 'blur(20px) saturate(200%)',
+                      background: 'rgba(255,255,255,0.6)',
+                      padding: '12px 20px',
+                      fontWeight: 800
+                    }}
                   />
-                  <Bar dataKey="count" fill="url(#barGradient)" radius={[6, 6, 0, 0]} barSize={32} />
+                  <Bar dataKey="count" fill="url(#barGradient)" radius={[12, 12, 0, 0]} barSize={38} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
