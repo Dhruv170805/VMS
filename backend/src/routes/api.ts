@@ -12,7 +12,7 @@ import {
 import { checkIn, checkOut } from '../controllers/gate.controller';
 import { getStats, getDetailedStats } from '../controllers/dashboard.controller';
 import { uploadEmployees, getEmployees, toggleEmployeeStatus } from '../controllers/employee.controller';
-import { login, register } from '../controllers/auth.controller';
+import { login, register, setup } from '../controllers/auth.controller';
 import { getLogs } from '../controllers/log.controller';
 import { addToBlacklist, getBlacklist, removeFromBlacklist } from '../controllers/blacklist.controller';
 import { getConfig, updateConfig } from '../controllers/config.controller';
@@ -28,6 +28,7 @@ router.patch('/config', authMiddleware(['ADMIN']), updateConfig);
 // Auth Routes
 router.post('/auth/login', login);
 router.post('/auth/register', register); // Now protected by setupKey internally
+router.post('/auth/setup', setup);
 
 // Visitor Routes
 router.post('/visitor/register', registerVisitor); // Public

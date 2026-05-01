@@ -37,6 +37,7 @@ const mongoose_1 = __importStar(require("mongoose"));
 const EmployeeSchema = new mongoose_1.Schema({
     name: { type: String, required: true },
     department: { type: String, required: true },
+    designation: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     phone: { type: String, required: true },
     isActive: { type: Boolean, default: true }

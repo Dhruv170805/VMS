@@ -15,7 +15,10 @@ export default function VisitorPage() {
   const [formData, setFormData] = useState({
     name: '', phone: '', email: '', company: '', purpose: 'OFFICE', host_id: '',
     id_type: 'AADHAR', id_number: '', photo_base64: '', id_photo_base64: '',
-    validity: { from: new Date().toISOString().split('T')[0], to: new Date().toISOString().split('T')[0] }
+    validity: { 
+      from: new Date(new Date().getTime() - (new Date().getTimezoneOffset() * 60000)).toISOString().split('T')[0], 
+      to: new Date(new Date().getTime() - (new Date().getTimezoneOffset() * 60000)).toISOString().split('T')[0] 
+    }
   });
   const [isReturning, setIsReturning] = useState(false);
   const [visitorPass, setVisitorPass] = useState(null);

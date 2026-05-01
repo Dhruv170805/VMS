@@ -25,8 +25,27 @@ function AnimatedNumber({ value }) {
 
 export default function Dashboard() {
   const [stats, setStats] = useState(null);
-  useEffect(() => { fetchAuth(`${API_BASE}/dashboard/stats`).then(r => r.json()).then(setStats); }, []);
+  const [error, setError] = useState(false);
+
+  useEffect(() => { 
+    fetchAuth(`${API_BASE}/dashboard/stats`)
+      .then(r => {
+        if (!r.ok) throw new Error('Failed to fetch stats');
+        return r.json();
+      })
+      .then(setStats)
+      .catch(err => {
+        console.error(err);
+        setError(true);
+      });
+  }, []);
   
+  if (error) return (
+    <div style={{ padding: '2rem', textAlign: 'center' }}>
+      <p style={{ color: '#ff3b30', fontWeight: 'bold' }}>Failed to load dashboard statistics.</p>
+    </div>
+  );
+
   if (!stats) return (
     <div style={{ padding: '2rem', textAlign: 'center' }}>
       <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }} style={{ width: 40, height: 40, border: '4px solid rgba(0,0,0,0.1)', borderTopColor: '#0071e3', borderRadius: '50%', margin: '0 auto' }} />

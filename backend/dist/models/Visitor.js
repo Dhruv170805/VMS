@@ -43,13 +43,13 @@ const VisitorSchema = new mongoose_1.Schema({
     id_photo_base64: { type: String, required: true },
     id_type: {
         type: String,
-        enum: ['AADHAR', 'PAN', 'DRIVING_LICENSE', 'ELECTION_CARD', 'OTHER'],
+        enum: ['AADHAR', 'PAN', 'DRIVING_LICENSE', 'ELECTION_CARD', 'PASSPORT', 'OTHER'],
         required: true
     },
     id_number: { type: String, required: true },
     purpose: {
         type: String,
-        enum: ['OFFICE', 'INTERNSHIP', 'TRAINING', 'OTHER'],
+        enum: ['OFFICE', 'INTERNSHIP', 'TRAINING', 'DELIVERY', 'INTERVIEW', 'OTHER'],
         required: true
     },
     host_id: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Employee', required: true, index: true },

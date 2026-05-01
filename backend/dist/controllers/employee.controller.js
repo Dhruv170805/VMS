@@ -52,6 +52,7 @@ const uploadEmployees = async (req, res) => {
         const employees = data.map((row) => ({
             name: row.Name || row.name,
             department: row.Department || row.department,
+            designation: row.Designation || row.designation || 'Staff',
             email: row.Email || row.email,
             phone: row.Phone || row.phone
         }));

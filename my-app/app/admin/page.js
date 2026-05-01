@@ -148,6 +148,12 @@ function AdminPanelContent() {
                 <div className="apple-input-group-vertical">
                   <label>Visitor Code Prefix</label>
                   <input type="text" value={settings.visitorCodePrefix || ''} onChange={e => setSettings({...settings, visitorCodePrefix: e.target.value})} />
+                  <label>Contact Email</label>
+                  <input type="email" value={settings.contactEmail || ''} onChange={e => setSettings({...settings, contactEmail: e.target.value})} />
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
+                    <input type="checkbox" checked={settings.allowPublicRegistration ?? true} onChange={e => setSettings({...settings, allowPublicRegistration: e.target.checked})} style={{ width: 'auto' }} />
+                    Allow Public Registration
+                  </label>
                 </div>
               </div>
               <button onClick={handleUpdateConfig} className="apple-btn-primary">Save System Changes</button>

@@ -2,7 +2,7 @@ import mongoose, { Document } from 'mongoose';
 export interface IUser extends Document {
     name: string;
     email: string;
-    role: 'ADMIN' | 'GUARD';
+    role: 'ADMIN' | 'GUARD' | 'EMPLOYEE';
     password: string;
     comparePassword: (password: string) => Promise<boolean>;
 }

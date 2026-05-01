@@ -9,6 +9,8 @@ export declare const VisitorRegistrationSchema: z.ZodObject<{
         OFFICE: "OFFICE";
         INTERNSHIP: "INTERNSHIP";
         TRAINING: "TRAINING";
+        DELIVERY: "DELIVERY";
+        INTERVIEW: "INTERVIEW";
     }>;
     host_id: z.ZodString;
     photo_base64: z.ZodString;
@@ -18,6 +20,7 @@ export declare const VisitorRegistrationSchema: z.ZodObject<{
         PAN: "PAN";
         DRIVING_LICENSE: "DRIVING_LICENSE";
         ELECTION_CARD: "ELECTION_CARD";
+        PASSPORT: "PASSPORT";
         OTHER: "OTHER";
     }>;
     id_number: z.ZodString;

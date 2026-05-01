@@ -9,19 +9,25 @@ const Log_1 = __importDefault(require("../models/Log"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const checkIn = async (req, res) => {
     try {
-        const { token, visitorCode } = req.body;
+        const { token, visitorCode, bypassKey } = req.body;
         let visitor;
         if (token) {
             const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
             visitor = await Visitor_1.default.findById(decoded.visitorId);
         }
         else if (visitorCode) {
+            // SECURITY: Disallow code-only entry unless a bypass key is provided (Guard override)
+            if (bypassKey !== process.env.GUARD_BYPASS_KEY) {
+                return res.status(403).json({ error: 'Security Violation: Signed QR token required for entry.' });
+            }
             visitor = await Visitor_1.default.findOne({ visitor_code: visitorCode });
         }
         if (!visitor)
             return res.status(404).json({ error: 'Visitor not found' });
-        if (visitor.status !== 'APPROVED')
-            return res.status(400).json({ error: 'Visitor not approved or already at gate' });
+        // Status validation: Can only check in if APPROVED
+        if (visitor.status !== 'APPROVED') {
+            return res.status(400).json({ error: `Invalid Status: Visitor is currently ${visitor.status}.` });
+        }
         visitor.status = 'GATE_IN';
         visitor.visit_timestamps.gate_in_at = new Date();
         await visitor.save();
@@ -33,7 +39,7 @@ const checkIn = async (req, res) => {
         res.json({ message: 'Gate entry marked successful', visitor });
     }
     catch (error) {
-        res.status(401).json({ error: 'Invalid or expired credentials' });
+        res.status(401).json({ error: 'Invalid or expired security token' });
     }
 };
 exports.checkIn = checkIn;
@@ -50,8 +56,11 @@ const checkOut = async (req, res) => {
         }
         if (!visitor)
             return res.status(404).json({ error: 'Visitor not found' });
-        if (visitor.status !== 'MEET_OVER')
-            return res.status(400).json({ error: 'Meeting not marked over yet' });
+        // LOGIC: Allow checkout from any active status
+        const activeStatuses = ['APPROVED', 'GATE_IN', 'MEET_IN', 'MEET_OVER'];
+        if (!activeStatuses.includes(visitor.status)) {
+            return res.status(400).json({ error: 'Visitor is not currently inside or approved.' });
+        }
         visitor.status = 'GATE_OUT';
         visitor.visit_timestamps.gate_out_at = new Date();
         await visitor.save();
@@ -63,7 +72,7 @@ const checkOut = async (req, res) => {
         res.json({ message: 'Gate exit marked successful', visitor });
     }
     catch (error) {
-        res.status(401).json({ error: 'Invalid or expired credentials' });
+        res.status(401).json({ error: 'Invalid or expired security token' });
     }
 };
 exports.checkOut = checkOut;

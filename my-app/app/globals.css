@@ -24,7 +24,7 @@
   --apple-blue: #0071e3;
   --apple-blue-rgb: 0, 113, 227;
   --apple-text: #1d1d1f;
-  --apple-text-muted: #6b7280;
+  --apple-text-muted: #86868b;
   
   /* Layout Safe Areas */
   --safe-padding: 2.5rem;
@@ -43,7 +43,7 @@
 body {
   margin: 0;
   padding: 0;
-  background: #fbfbfd;
+  background: #f5f5f7;
   color: var(--apple-text);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   overflow-x: hidden;
@@ -55,23 +55,23 @@ body {
   position: fixed;
   inset: 0;
   z-index: -1;
-  background-color: #fbfbfd;
+  background-color: #f5f5f7;
   background-image: 
-    radial-gradient(at 0% 0%, hsla(202, 100%, 91%, 1) 0, transparent 50%),
-    radial-gradient(at 50% 0%, hsla(202, 100%, 85%, 1) 0, transparent 50%),
-    radial-gradient(at 100% 0%, hsla(202, 100%, 80%, 1) 0, transparent 50%),
-    radial-gradient(at 100% 50%, hsla(271, 100%, 90%, 1) 0, transparent 50%),
-    radial-gradient(at 100% 100%, hsla(202, 100%, 85%, 1) 0, transparent 50%),
-    radial-gradient(at 0% 100%, hsla(202, 100%, 91%, 1) 0, transparent 50%),
-    radial-gradient(at 0% 50%, hsla(202, 100%, 88%, 1) 0, transparent 50%);
-  filter: blur(100px);
-  animation: meshMove 20s ease-in-out infinite alternate;
+    radial-gradient(circle at 15% 50%, rgba(200, 225, 255, 0.8), transparent 50%),
+    radial-gradient(circle at 85% 30%, rgba(220, 210, 255, 0.8), transparent 50%),
+    radial-gradient(circle at 50% 80%, rgba(235, 245, 255, 0.8), transparent 50%),
+    radial-gradient(circle at 80% 90%, rgba(255, 230, 240, 0.8), transparent 50%),
+    radial-gradient(circle at 20% 10%, rgba(240, 245, 255, 0.8), transparent 50%);
+  filter: blur(80px);
+  animation: meshMove 25s ease-in-out infinite alternate;
+  opacity: 0.9;
 }
 
 @keyframes meshMove {
   0% { transform: scale(1) translate(0, 0); }
-  50% { transform: scale(1.1) translate(2%, 2%); }
-  100% { transform: scale(1) translate(-1%, 1%); }
+  33% { transform: scale(1.05) translate(3%, -2%); }
+  66% { transform: scale(1.1) translate(-2%, 4%); }
+  100% { transform: scale(1) translate(-1%, -1%); }
 }
 
 /* SPATIAL ENGINE */

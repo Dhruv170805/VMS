@@ -1,6 +1,13 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  /* API is now integrated via app/api routes */
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: `${process.env.BACKEND_URL || 'http://localhost:5001'}/api/:path*`,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

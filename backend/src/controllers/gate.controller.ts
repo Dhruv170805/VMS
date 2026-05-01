@@ -12,9 +12,11 @@ export const checkIn = async (req: Request, res: Response) => {
       const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
       visitor = await Visitor.findById(decoded.visitorId);
     } else if (visitorCode) {
-      // SECURITY: Disallow code-only entry unless a bypass key is provided (Guard override)
-      if (bypassKey !== process.env.GUARD_BYPASS_KEY) {
-        return res.status(403).json({ error: 'Security Violation: Signed QR token required for entry.' });
+      // SECURITY: Allow manual code entry if the actor is an authenticated GUARD/ADMIN
+      // Otherwise, require a bypass key (Guard override via API)
+      const isAuthorizedActor = req.user && (req.user.role === 'GUARD' || req.user.role === 'ADMIN');
+      if (!isAuthorizedActor && bypassKey !== process.env.GUARD_BYPASS_KEY) {
+        return res.status(403).json({ error: 'Security Violation: Manual entry restricted to authorized personnel.' });
       }
       visitor = await Visitor.findOne({ visitor_code: visitorCode });
     }
@@ -51,15 +53,20 @@ export const checkOut = async (req: Request, res: Response) => {
       const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
       visitor = await Visitor.findById(decoded.visitorId);
     } else if (visitorCode) {
+      const { bypassKey } = req.body;
+      const isAuthorizedActor = req.user && (req.user.role === 'GUARD' || req.user.role === 'ADMIN');
+      if (!isAuthorizedActor && bypassKey !== process.env.GUARD_BYPASS_KEY) {
+        return res.status(403).json({ error: 'Security Violation: Manual exit restricted to authorized personnel.' });
+      }
       visitor = await Visitor.findOne({ visitor_code: visitorCode });
     }
 
     if (!visitor) return res.status(404).json({ error: 'Visitor not found' });
     
-    // LOGIC: Allow checkout from any active status (GATE_IN, MEET_IN, MEET_OVER)
-    const activeStatuses = ['GATE_IN', 'MEET_IN', 'MEET_OVER'];
+    // LOGIC: Allow checkout from any active status
+    const activeStatuses = ['APPROVED', 'GATE_IN', 'MEET_IN', 'MEET_OVER'];
     if (!activeStatuses.includes(visitor.status)) {
-      return res.status(400).json({ error: 'Visitor is not currently inside the premises.' });
+      return res.status(400).json({ error: 'Visitor is not currently inside or approved.' });
     }
 
     visitor.status = 'GATE_OUT';

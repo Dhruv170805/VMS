@@ -7,11 +7,11 @@ exports.VisitorRegistrationSchema = zod_1.z.object({
     phone: zod_1.z.string().min(10),
     email: zod_1.z.string().email(),
     company: zod_1.z.string().min(2),
-    purpose: zod_1.z.enum(['OFFICE', 'INTERNSHIP', 'TRAINING', 'OTHER']),
+    purpose: zod_1.z.enum(['OFFICE', 'INTERNSHIP', 'TRAINING', 'DELIVERY', 'INTERVIEW', 'OTHER']),
     host_id: zod_1.z.string(),
     photo_base64: zod_1.z.string(),
     id_photo_base64: zod_1.z.string(),
-    id_type: zod_1.z.enum(['AADHAR', 'PAN', 'DRIVING_LICENSE', 'ELECTION_CARD', 'OTHER']),
+    id_type: zod_1.z.enum(['AADHAR', 'PAN', 'DRIVING_LICENSE', 'ELECTION_CARD', 'PASSPORT', 'OTHER']),
     id_number: zod_1.z.string().min(4),
     validity: zod_1.z.object({
         from: zod_1.z.string().refine((val) => !isNaN(Date.parse(val)), { message: "Invalid date" }),

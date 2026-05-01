@@ -12,12 +12,17 @@ const employee_controller_1 = require("../controllers/employee.controller");
 const auth_controller_1 = require("../controllers/auth.controller");
 const log_controller_1 = require("../controllers/log.controller");
 const blacklist_controller_1 = require("../controllers/blacklist.controller");
+const config_controller_1 = require("../controllers/config.controller");
 const auth_middleware_1 = require("../middleware/auth.middleware");
 const router = (0, express_1.Router)();
 const upload = (0, multer_1.default)({ storage: multer_1.default.memoryStorage() });
+// System Config (Public for initialization, Update protected)
+router.get('/config', config_controller_1.getConfig);
+router.patch('/config', (0, auth_middleware_1.authMiddleware)(['ADMIN']), config_controller_1.updateConfig);
 // Auth Routes
 router.post('/auth/login', auth_controller_1.login);
 router.post('/auth/register', auth_controller_1.register); // Now protected by setupKey internally
+router.post('/auth/setup', auth_controller_1.setup);
 // Visitor Routes
 router.post('/visitor/register', visitor_controller_1.registerVisitor); // Public
 router.get('/visitor/pending', (0, auth_middleware_1.authMiddleware)(['ADMIN', 'GUARD']), visitor_controller_1.getPendingVisitors);

@@ -2,6 +2,7 @@ import mongoose, { Document } from 'mongoose';
 export interface IEmployee extends Document {
     name: string;
     department: string;
+    designation: string;
     email: string;
     phone: string;
     isActive: boolean;

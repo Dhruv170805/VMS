@@ -9,10 +9,13 @@ const Log_1 = __importDefault(require("../models/Log"));
 const Blacklist_1 = __importDefault(require("../models/Blacklist"));
 const visitor_schema_1 = require("../validation/visitor.schema");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const SystemConfig_1 = __importDefault(require("../models/SystemConfig"));
 const registerVisitor = async (req, res) => {
     try {
         console.log(`📝 Registering new visitor: ${req.body.name} (${req.body.phone})`);
         const validatedData = visitor_schema_1.VisitorRegistrationSchema.parse(req.body);
+        // Fetch System Config
+        const config = await SystemConfig_1.default.findOne() || new SystemConfig_1.default();
         // Check Blacklist
         const isBlacklisted = await Blacklist_1.default.findOne({
             $or: [
@@ -24,16 +27,21 @@ const registerVisitor = async (req, res) => {
             console.warn(`🚫 Blacklisted visitor attempted registration: ${validatedData.name}`);
             return res.status(403).json({ error: 'Access Denied: Your details are blacklisted.' });
         }
-        // Generate unique visitor code: VMS-YYYYMMDD-XXXX
+        // Generate unique visitor code: PREFIX-YYYYMMDD-XXXX
         const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
         const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
-        const visitor_code = `VMS-${dateStr}-${randomStr}`;
+        const visitor_code = `${config.visitorCodePrefix}-${dateStr}-${randomStr}`;
+        // Normalize validity dates to full day boundaries
+        const fromDate = new Date(validatedData.validity.from);
+        fromDate.setHours(0, 0, 0, 0);
+        const toDate = new Date(validatedData.validity.to);
+        toDate.setHours(23, 59, 59, 999);
         const visitor = new Visitor_1.default({
             ...validatedData,
             visitor_code,
             validity: {
-                from: new Date(validatedData.validity.from),
-                to: new Date(validatedData.validity.to)
+                from: fromDate,
+                to: toDate
             },
             status: 'PENDING'
         });
@@ -48,7 +56,8 @@ const registerVisitor = async (req, res) => {
     }
     catch (error) {
         console.error(`❌ Registration Error: ${error.message}`);
-        res.status(400).json({ error: error.errors || error.message });
+        const errorMessage = error.errors ? error.errors.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ') : error.message;
+        res.status(400).json({ error: errorMessage });
     }
 };
 exports.registerVisitor = registerVisitor;
@@ -109,7 +118,8 @@ const approveVisitor = async (req, res) => {
         res.json({ message: `Visitor ${status.toLowerCase()} successfully`, visitor, qrCode });
     }
     catch (error) {
-        res.status(400).json({ error: error.errors || error.message });
+        const errorMessage = error.errors ? error.errors.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ') : error.message;
+        res.status(400).json({ error: errorMessage });
     }
 };
 exports.approveVisitor = approveVisitor;
