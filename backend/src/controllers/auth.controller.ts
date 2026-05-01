@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import User from '../models/User';
+import Employee from '../models/Employee';
 import jwt from 'jsonwebtoken';
 
 export const login = async (req: Request, res: Response) => {
@@ -17,7 +18,10 @@ export const login = async (req: Request, res: Response) => {
       { expiresIn: '1d' }
     );
 
-    res.json({ token, role: user.role, name: user.name, userId: user._id });
+    const employee = await Employee.findOne({ email });
+    const employeeId = employee ? employee._id : null;
+
+    res.json({ token, role: user.role, name: user.name, userId: user._id, employeeId });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }

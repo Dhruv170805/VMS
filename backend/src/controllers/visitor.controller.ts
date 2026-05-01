@@ -109,10 +109,14 @@ export const approveVisitor = async (req: Request, res: Response) => {
 
     let qrCode = null;
     if (status === 'APPROVED') {
-      qrCode = jwt.sign(
-        { visitorId: visitor._id, exp: Math.floor(visitor.validity.to.getTime() / 1000) },
-        process.env.JWT_SECRET as string
-      );
+      const expiresIn = Math.floor((visitor.validity.to.getTime() - Date.now()) / 1000);
+      if (expiresIn > 0) {
+        qrCode = jwt.sign(
+          { visitorId: visitor._id },
+          process.env.JWT_SECRET as string,
+          { expiresIn }
+        );
+      }
     }
 
     res.json({ message: `Visitor ${status.toLowerCase()} successfully`, visitor, qrCode });
@@ -158,11 +162,15 @@ export const getVisitorByCode = async (req: Request, res: Response) => {
 
     let token = null;
     // Allow token retrieval if visitor is approved or already inside
-    if (!['PENDING', 'REJECTED'].includes(visitor.status)) {
-      token = jwt.sign(
-        { visitorId: visitor._id, exp: Math.floor(visitor.validity.to.getTime() / 1000) },
-        process.env.JWT_SECRET as string
-      );
+    if (['APPROVED', 'GATE_IN', 'MEET_IN', 'MEET_OVER'].includes(visitor.status)) {
+      const expiresIn = Math.floor((visitor.validity.to.getTime() - Date.now()) / 1000);
+      if (expiresIn > 0) {
+        token = jwt.sign(
+          { visitorId: visitor._id },
+          process.env.JWT_SECRET as string,
+          { expiresIn }
+        );
+      }
     }
 
     res.json({ visitor, token });

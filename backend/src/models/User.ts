@@ -18,7 +18,7 @@ const UserSchema: Schema = new Schema({
 
 UserSchema.pre('save', async function(this: IUser) {
   if (!this.isModified('password')) return;
-  this.password = await bcrypt.hash(this.password, 10);
+  this.password = await bcrypt.hash(this.password, 12);
 });
 
 UserSchema.methods.comparePassword = async function(candidatePassword: string) {

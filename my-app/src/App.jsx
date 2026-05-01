@@ -7,6 +7,17 @@ import './App.css';
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://127.0.0.1:5001/api';
 
+const fetchAuth = (url, options = {}) => {
+  const token = localStorage.getItem('token');
+  return fetch(url, {
+    ...options,
+    headers: {
+      ...options.headers,
+      ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+    }
+  });
+};
+
 // --- Haptic Engine ---
 const haptic = (type = 'light') => {
   if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
@@ -78,7 +89,7 @@ const usePullToRefresh = (onRefresh) => {
     const handleStart = (e) => startY = e.touches[0].clientY;
     const handleEnd = (e) => {
       const endY = e.changedTouches[0].clientY;
-      if (endY - startY > 150) {
+      if (endY - startY > 150 && window.scrollY === 0) {
         haptic('medium');
         onRefresh();
       }
@@ -146,6 +157,7 @@ function Home() {
       localStorage.setItem('role', data.role);
       localStorage.setItem('name', data.name);
       localStorage.setItem('userId', data.userId);
+      if (data.employeeId) localStorage.setItem('employeeId', data.employeeId);
       navigate(data.role === 'ADMIN' ? '/admin' : data.role === 'GUARD' ? '/guard' : '/host');
     } catch (err) { setError(err.message); }
   };
@@ -446,7 +458,7 @@ function CameraCapture({ onCapture }) {
     <div className="camera-comp-glass">
       {isCamera ? (
         <div className="webcam-overlay">
-          <Webcam audio={false} ref={webcamRef} screenshotFormat="image/jpeg" width={320} />
+          <Webcam audio={false} ref={webcamRef} screenshotFormat="image/jpeg" screenshotQuality={0.7} videoConstraints={{ width: 320 }} width={320} />
           <button type="button" onClick={capture} className="apple-btn-capture">Capture</button>
         </div>
       ) : (
@@ -455,8 +467,22 @@ function CameraCapture({ onCapture }) {
       <label className="file-upload-glass">
         <input type="file" accept="image/*" onChange={(e) => {
           const file = e.target.files[0];
+          if (!file) return;
           const reader = new FileReader();
-          reader.onloadend = () => onCapture(reader.result);
+          reader.onloadend = () => {
+            const img = new Image();
+            img.onload = () => {
+              const canvas = document.createElement('canvas');
+              const MAX_WIDTH = 400;
+              const scaleSize = MAX_WIDTH / img.width;
+              canvas.width = MAX_WIDTH;
+              canvas.height = img.height * scaleSize;
+              const ctx = canvas.getContext('2d');
+              ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+              onCapture(canvas.toDataURL('image/jpeg', 0.7));
+            };
+            img.src = reader.result;
+          };
           reader.readAsDataURL(file);
         }} />
         <span>Upload Image</span>
@@ -479,11 +505,11 @@ function AdminPanel() {
   const fetchData = async () => {
     try {
       const [vRes, eRes, logRes, allTodayRes, blRes] = await Promise.all([
-        fetch(`${API_BASE}/visitor/pending`),
-        fetch(`${API_BASE}/employees`),
-        fetch(`${API_BASE}/logs`),
-        fetch(`${API_BASE}/dashboard/stats/detailed`),
-        fetch(`${API_BASE}/blacklist`)
+        fetchAuth(`${API_BASE}/visitor/pending`),
+        fetch(`${API_BASE}/employees`), // public
+        fetchAuth(`${API_BASE}/logs`),
+        fetchAuth(`${API_BASE}/dashboard/stats/detailed`),
+        fetchAuth(`${API_BASE}/blacklist`)
       ]);
       setPending(await vRes.json());
       setEmployees(await eRes.json());
@@ -516,7 +542,7 @@ function AdminPanel() {
 
   const toggleEmployee = async (id) => {
     haptic('light');
-    await fetch(`${API_BASE}/employees/${id}/toggle`, { method: 'PATCH' });
+    await fetchAuth(`${API_BASE}/employees/${id}/toggle`, { method: 'PATCH' });
     haptic('medium');
     fetchData();
   };
@@ -525,7 +551,7 @@ function AdminPanel() {
     const reason = window.prompt("Reason for blacklisting?");
     if (reason === null) return;
     haptic('heavy');
-    await fetch(`${API_BASE}/blacklist`, {
+    await fetchAuth(`${API_BASE}/blacklist`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ value, type, reason })
@@ -644,7 +670,7 @@ function AdminPanel() {
                 <input type="file" onChange={e => setFile(e.target.files[0])} className="apple-file" />
                 <button onClick={async () => {
                   const fd = new FormData(); fd.append('file', file);
-                  await fetch(`${API_BASE}/employees/upload`, { method: 'POST', body: fd });
+                  await fetchAuth(`${API_BASE}/employees/upload`, { method: 'POST', body: fd });
                   fetchData();
                 }} className="apple-btn-primary">Update Database</button>
               </div>
@@ -679,7 +705,7 @@ function AdminPanel() {
                     <td>{b.value}</td>
                     <td>{b.type}</td>
                     <td>{b.reason}</td>
-                    <td><button className="apple-badge danger" onClick={async () => { await fetch(`${API_BASE}/blacklist/${b._id}`, { method: 'DELETE' }); fetchData(); }}>Unban</button></td>
+                    <td><button className="apple-badge danger" onClick={async () => { await fetchAuth(`${API_BASE}/blacklist/${b._id}`, { method: 'DELETE' }); fetchData(); }}>Unban</button></td>
                   </tr>
                 ))}
               </tbody>
@@ -718,7 +744,7 @@ function GuardPanel() {
 
   const fetchStats = async () => {
     try {
-      const res = await fetch(`${API_BASE}/dashboard/stats`);
+      const res = await fetchAuth(`${API_BASE}/dashboard/stats`);
       setStats(await res.json());
     } catch (err) { console.error(err); }
   };
@@ -734,7 +760,7 @@ function GuardPanel() {
   const handleGate = async (action) => {
     haptic('light');
     const payload = input.startsWith('VMS-') ? { visitorCode: input } : { token: input };
-    const res = await fetch(`${API_BASE}/gate/${action}`, {
+    const res = await fetchAuth(`${API_BASE}/gate/${action}`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(payload)
@@ -1083,12 +1109,16 @@ function App() {
         // 3D Tilt Effect
         const tiltX = (y / rect.height - 0.5) * 5; // Max 5 degrees
         const tiltY = (x / rect.width - 0.5) * -5; // Max 5 degrees
-        el.style.transform = `translateY(-8px) scale(1.02) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`;
+        el.style.setProperty("--tilt-x", `${tiltX}deg`);
+        el.style.setProperty("--tilt-y", `${tiltY}deg`);
+        el.style.transform = `translateY(-8px) scale(1.02) rotateX(var(--tilt-x)) rotateY(var(--tilt-y))`;
       });
     };
 
     const handleMouseLeave = () => {
       document.querySelectorAll(".glass-card, .glass").forEach((el) => {
+        el.style.setProperty("--tilt-x", `0deg`);
+        el.style.setProperty("--tilt-y", `0deg`);
         el.style.transform = "translateY(0) scale(1) rotateX(0) rotateY(0)";
       });
     };

@@ -21,11 +21,10 @@ export const uploadEmployees = async (req: Request, res: Response) => {
     }));
 
     // For simplicity, we clear and re-upload or upsert
-    // Let's use bulkWrite for upsert by email
     const ops = employees.map(emp => ({
       updateOne: {
         filter: { email: emp.email },
-        update: emp,
+        update: { $set: emp },
         upsert: true
       }
     }));
