@@ -73,6 +73,70 @@ body {
   100% { transform: scale(1.1) translate(-1%, -1%); }
 }
 
+/* UNIFIED APP CONTAINERS */
+.app-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100vw;
+  min-height: 100vh;
+}
+
+.app-main {
+  width: 100%;
+  height: 100%;
+}
+
+/* CENTERED PAGE LAYOUTS */
+.home-layout, .login-layout, .visitor-layout, .pass-layout {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  min-height: 100vh;
+  padding: 2.5rem;
+}
+
+.wide-glass {
+  max-width: 1100px !important;
+}
+
+.main-logo-text {
+  letter-spacing: -3px;
+  background: linear-gradient(180deg, var(--apple-text), #555);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 900;
+}
+
+.text-secondary {
+  color: var(--apple-text-muted);
+}
+
+.apple-btn-secondary {
+  background: rgba(0, 0, 0, 0.05);
+  color: var(--apple-text);
+  border: none;
+  padding: 16px 32px;
+  border-radius: 22px;
+  font-weight: 800;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.apple-btn-secondary:hover {
+  background: rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+.error-text {
+  color: #ff3b30;
+  font-weight: 600;
+  margin-top: 1rem;
+}
+
 /* UNIFIED DASHBOARD SYSTEM (GOD LEVEL) */
 .dashboard-layout {
   display: grid;
