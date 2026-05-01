@@ -12,10 +12,10 @@ export function ConfigProvider({ children }) {
     companyName: 'Apple Studio',
     visitorCodePrefix: 'VMS'
   });
+  const [error, setError] = useState(null);
 
   const fetchConfig = async () => {
     try {
-      // Use absolute URL logic if in dev or based on API_BASE
       const url = API_BASE.startsWith('http') ? `${API_BASE}/config` : `${window.location.origin}${API_BASE}/config`;
       
       const res = await fetch(url);
@@ -23,10 +23,13 @@ export function ConfigProvider({ children }) {
       
       if (data && !data.error) {
         setConfig(data);
+        setError(null);
       } else if (data?.error) {
+        setError(data.error);
         console.warn('Config fetch warning:', data.error);
       }
     } catch (err) { 
+      setError("Network Connection Error");
       console.error('Failed to connect to VMS API:', err); 
     }
   };
@@ -38,7 +41,7 @@ export function ConfigProvider({ children }) {
   }, []);
 
   return (
-    <ConfigContext.Provider value={{ config, refreshConfig: fetchConfig }}>
+    <ConfigContext.Provider value={{ config, error, refreshConfig: fetchConfig }}>
       {children}
     </ConfigContext.Provider>
   );

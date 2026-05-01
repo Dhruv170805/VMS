@@ -31,25 +31,24 @@ export const safeJson = async (res) => {
     const text = await res.text();
     if (!text) return null;
     
-    // Check if the response actually looks like JSON
     const looksLikeJson = (text.trim().startsWith('{') || text.trim().startsWith('['));
     
     if (!looksLikeJson) {
+      const isHtml = text.includes('<!DOCTYPE html>') || text.includes('<html');
       return { 
-        error: `Server returned a non-JSON response (${res.status}).`,
-        details: text.slice(0, 100) // Capture start of message for debugging
+        error: isHtml ? `API connection failed (${res.status}).` : "Invalid response.",
+        details: isHtml ? "The server returned an HTML error page. Check if the backend is running and the BACKEND_URL is correct." : text.slice(0, 50)
       };
     }
 
     try {
       return JSON.parse(text);
     } catch (e) {
-      // Fallback for cases where it looked like JSON but was malformed
       return { error: "Malformed JSON response from server." };
     }
   } catch (err) {
-    console.error("SafeJson Network/Stream Error:", err);
-    return { error: "Network error or connection lost." };
+    console.error("SafeJson Network Error:", err);
+    return { error: "Cannot reach API server. Ensure backend is running and accessible (check local IP if on mobile)." };
   }
 };
 
