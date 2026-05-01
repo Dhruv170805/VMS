@@ -6,7 +6,7 @@ import GlassCard from '@/components/GlassCard';
 import DigitalPass from '@/components/DigitalPass';
 import CameraCapture from '@/components/CameraCapture';
 import { useConfig } from '@/context/ConfigContext';
-import { API_BASE, VISIT_PURPOSES, ID_TYPES } from '@/utils/config';
+import { API_BASE, VISIT_PURPOSES, ID_TYPES, safeJson } from '@/utils/config';
 
 export default function VisitorPage() {
   const { config: sysConfig } = useConfig();
@@ -27,7 +27,7 @@ export default function VisitorPage() {
   const router = useRouter();
 
   useEffect(() => {
-    fetch(`${API_BASE}/employees?activeOnly=true`).then(res => res.json()).then(setEmployees);
+    fetch(`${API_BASE}/employees?activeOnly=true`).then(res => safeJson(res)).then(data => { if (data) setEmployees(data) });
   }, []);
 
   const checkIdentity = async () => {
@@ -39,8 +39,8 @@ export default function VisitorPage() {
     setError(null);
     try {
       const res = await fetch(`${API_BASE}/visitor/profile?name=${encodeURIComponent(formData.name)}&phone=${encodeURIComponent(formData.phone)}`);
-      const data = await res.json();
-      if (data) {
+      const data = await safeJson(res);
+      if (data && !data.error) {
         setFormData({ ...formData, ...data });
         setIsReturning(true);
       } else {
@@ -65,8 +65,8 @@ export default function VisitorPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData)
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error?.[0]?.message || data.error || 'Registration failed');
+      const data = await safeJson(response);
+      if (!response.ok) throw new Error(data?.error?.[0]?.message || data?.error || 'Registration failed');
       
       const host = employees.find(e => e._id === formData.host_id);
       setVisitorPass({ 

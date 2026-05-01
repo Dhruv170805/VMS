@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import GlassCard from '@/components/GlassCard';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { haptic, usePullToRefresh } from '@/utils/hooks';
-import { API_BASE, fetchAuth } from '@/utils/config';
+import { API_BASE, fetchAuth, safeJson } from '@/utils/config';
 import { useConfig } from '@/context/ConfigContext';
 
 function GuardPanelContent() {
@@ -23,7 +23,7 @@ function GuardPanelContent() {
   const fetchStats = async () => {
     try {
       const res = await fetchAuth(`${API_BASE}/dashboard/stats`);
-      if (res.ok) setStats(await res.json());
+      if (res.ok) setStats(await safeJson(res));
     } catch (err) { console.error(err); }
   };
 
@@ -43,9 +43,9 @@ function GuardPanelContent() {
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(payload)
     });
-    const d = await res.json();
+    const d = await safeJson(res);
     if (res.ok) haptic('success'); else haptic('error');
-    setMsg({ text: d.message || d.error, type: res.ok ? 'success' : 'error' });
+    setMsg({ text: d?.message || d?.error || "Unknown Error", type: res.ok ? 'success' : 'error' });
     if (res.ok) {
       setInput('');
       fetchStats();

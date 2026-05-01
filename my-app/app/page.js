@@ -8,7 +8,7 @@ import { motion } from 'framer-motion';
 import GlassCard from '@/components/GlassCard';
 import DigitalPass from '@/components/DigitalPass';
 import { haptic } from '@/utils/hooks';
-import { API_BASE } from '@/utils/config';
+import { API_BASE, safeJson } from '@/utils/config';
 import { useConfig } from '@/context/ConfigContext';
 
 export default function Home() {
@@ -29,10 +29,10 @@ export default function Home() {
     setError('');
     try {
       const res = await fetch(`${API_BASE}/visitor/track/${trackCode}`);
-      const data = await res.json();
+      const data = await safeJson(res);
       if (!res.ok) {
         haptic('error');
-        throw new Error(data.error);
+        throw new Error(data?.error || "Could not track visitor");
       }
       haptic('success');
       setVisitorPass({
@@ -54,10 +54,10 @@ export default function Home() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (!res.ok) {
         haptic('error');
-        throw new Error(data.error);
+        throw new Error(data?.error || "Login failed");
       }
       haptic('success');
       localStorage.setItem('token', data.token);

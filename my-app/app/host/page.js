@@ -6,7 +6,7 @@ import GlassCard from '@/components/GlassCard';
 import SwipeableItem from '@/components/SwipeableItem';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { haptic, usePullToRefresh } from '@/utils/hooks';
-import { API_BASE, fetchAuth } from '@/utils/config';
+import { API_BASE, fetchAuth, safeJson } from '@/utils/config';
 import { useConfig } from '@/context/ConfigContext';
 
 function HostDashboardContent() {
@@ -28,8 +28,8 @@ function HostDashboardContent() {
     try {
       const res = await fetchAuth(`${API_BASE}/visitor/host/${hostId}`);
       if (res.ok) {
-        const data = await res.json();
-        setVisitors(data);
+        const data = await safeJson(res);
+        if (data) setVisitors(data);
       }
     } catch (err) { console.error(err); }
     finally { setLoading(false); }

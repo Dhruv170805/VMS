@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
 import { motion } from 'framer-motion';
-import { API_BASE } from '../utils/config';
+import { API_BASE, safeJson } from '../utils/config';
 import { useConfig } from '@/context/ConfigContext';
 
 function DigitalPass({ pass, onBack }) {
@@ -14,15 +14,17 @@ function DigitalPass({ pass, onBack }) {
     const interval = setInterval(async () => {
       try {
         const res = await fetch(`${API_BASE}/visitor/track/${currentPass.visitor_code}`);
-        const data = await res.json();
         if (res.ok) {
-          setCurrentPass({
-            ...data.visitor,
-            token: data.token,
-            host_name: data.visitor.host_id?.name,
-            host_dept: data.visitor.host_id?.department
-          });
-          if (data.visitor.status !== 'PENDING') setPolling(false);
+          const data = await safeJson(res);
+          if (data && data.visitor) {
+            setCurrentPass({
+              ...data.visitor,
+              token: data.token,
+              host_name: data.visitor.host_id?.name,
+              host_dept: data.visitor.host_id?.department
+            });
+            if (data.visitor.status !== 'PENDING') setPolling(false);
+          }
         }
       } catch (err) { console.error(err); }
     }, 5000);

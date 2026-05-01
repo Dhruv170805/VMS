@@ -23,6 +23,17 @@ export const fetchAuth = (url, options = {}) => {
   });
 };
 
+export const safeJson = async (res) => {
+  try {
+    const text = await res.text();
+    if (!text) return null;
+    return JSON.parse(text);
+  } catch (err) {
+    console.error("Failed to parse JSON response:", err);
+    return { error: "Invalid server response. Ensure API is running." };
+  }
+};
+
 export const VISIT_PURPOSES = [
   { value: 'OFFICE', label: 'Office Visit' },
   { value: 'INTERNSHIP', label: 'Internship' },

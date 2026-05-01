@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { API_BASE } from '@/utils/config';
+import { API_BASE, safeJson } from '@/utils/config';
 
 const ConfigContext = createContext();
 
@@ -17,12 +17,8 @@ export function ConfigProvider({ children }) {
     try {
       const res = await fetch(`${API_BASE}/config`);
       if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-      const contentType = res.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        throw new TypeError("Oops, we haven't got JSON!");
-      }
-      const data = await res.json();
-      if (data) setConfig(data);
+      const data = await safeJson(res);
+      if (data && !data.error) setConfig(data);
     } catch (err) { console.error('Failed to load config:', err); }
   };
 
