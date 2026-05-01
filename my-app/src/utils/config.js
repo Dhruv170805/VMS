@@ -1,4 +1,9 @@
-export const API_BASE = import.meta.env.VITE_API_BASE || 'http://127.0.0.1:5001/api';
+const getApiBase = () => {
+  const base = import.meta.env.VITE_API_BASE || 'http://127.0.0.1:5001/api';
+  return base.endsWith('/') ? base.slice(0, -1) : base;
+};
+
+export const API_BASE = getApiBase();
 
 export const fetchAuth = (url, options = {}) => {
   const token = localStorage.getItem('token');
