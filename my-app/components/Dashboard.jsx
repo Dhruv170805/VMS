@@ -82,7 +82,7 @@ export default function Dashboard() {
         </motion.div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px', marginTop: '24px' }}>
+      <div className="dash-charts-grid">
         <motion.div variants={item}>
           <GlassCard className="main-glass" style={{ padding: '2.5rem' }}>
             <h3 style={{ marginBottom: '2rem' }}>Traffic Overview</h3>

@@ -443,6 +443,19 @@ body {
   letter-spacing: -1px;
 }
 
+.dash-charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 24px;
+  margin-top: 24px;
+}
+
+@media (max-width: 480px) {
+  .dash-charts-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* LIST & TABLE SYSTEM */
 .apple-list {
   display: flex;
@@ -520,6 +533,35 @@ body {
   background: rgba(255, 255, 255, 0.5);
 }
 
+.form-actions-glass {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .form-actions-glass {
+    flex-direction: column;
+  }
+}
+
+.logout-btn-glass {
+  background: rgba(255, 59, 48, 0.1);
+  color: #ff3b30;
+  border: 1px solid rgba(255, 59, 48, 0.2);
+  padding: 12px 20px;
+  border-radius: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+  margin-top: auto;
+}
+
+.logout-btn-glass:hover {
+  background: #ff3b30;
+  color: white;
+}
+
 /* FORM ELEMENTS */
 .apple-input-group-vertical {
   display: flex;
@@ -545,27 +587,260 @@ body {
   border-color: var(--apple-blue);
 }
 
-/* STATUS BADGES */
-.status-badge-glass.PENDING { color: #f59e0b; background: rgba(245, 158, 11, 0.1); }
-.status-badge-glass.APPROVED { color: #10b981; background: rgba(16, 185, 129, 0.1); }
-.status-badge-glass.GATE_IN { color: #3b82f6; background: rgba(59, 130, 246, 0.1); }
-.status-badge-glass.MEET_IN { color: #8b5cf6; background: rgba(139, 92, 246, 0.1); }
-.status-badge-glass.MEET_OVER { color: #6b7280; background: rgba(107, 114, 128, 0.1); }
-.status-badge-glass.GATE_OUT { color: #000; background: rgba(0, 0, 0, 0.05); }
-.status-badge-glass.REJECTED { color: #ef4444; background: rgba(239, 68, 68, 0.1); }
+/* ADMIN PANEL REFINEMENT */
+.admin-side-nav {
+  position: sticky;
+  top: 24px;
+  height: calc(100vh - 48px);
+  min-width: 300px;
+}
 
-/* MISC */
-.apple-alert-info {
-  background: rgba(var(--apple-blue-rgb), 0.08);
-  padding: 1.5rem;
-  border-radius: 20px;
-  margin-top: 2rem;
-  border: 1px solid rgba(var(--apple-blue-rgb), 0.1);
-  font-weight: 500;
+.nav-logo {
+  font-size: 2.2rem;
+  font-weight: 900;
+  letter-spacing: -2px;
+  padding: 0.5rem 0;
+  margin-bottom: 3rem;
   text-align: center;
 }
 
+.nav-group button {
+  position: relative;
+  overflow: hidden;
+  border-radius: 18px;
+  margin-bottom: 4px;
+}
+
+.nav-group button::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 0;
+  background: var(--apple-blue);
+  border-radius: 0 4px 4px 0;
+  transition: var(--transition);
+}
+
+.nav-group button.active::after {
+  height: 60%;
+}
+
+.admin-main {
+  animation: slideInUp 0.6s var(--ease-liquid);
+}
+
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* TABLE UPGRADE */
+.apple-table-container {
+  margin-top: 1.5rem;
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 8px;
+}
+
+.apple-table {
+  border-spacing: 0 8px;
+}
+
+.apple-table td {
+  padding: 1.4rem 24px;
+  font-weight: 500;
+}
+
+.list-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* APPLE BADGES */
+.apple-badge {
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.apple-badge.success { background: rgba(52, 199, 89, 0.15); color: #248a3d; }
+.apple-badge.danger { background: rgba(255, 59, 48, 0.15); color: #ff3b30; }
+.apple-badge.secondary { background: rgba(0, 0, 0, 0.05); color: #666; }
+
+/* DASHBOARD MINI STATS */
+.mini-stat {
+  border: 1px solid rgba(255, 255, 255, 0.5) !important;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.03) !important;
+}
+
+.mini-stat .value {
+  background: linear-gradient(180deg, var(--apple-text), #666);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* STATUS BADGES - PREMIUM GLASS */
+.status-badge-glass {
+  padding: 6px 14px;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.status-badge-glass.PENDING { color: #f59e0b; background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.2); }
+.status-badge-glass.APPROVED { color: #10b981; background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.2); }
+.status-badge-glass.GATE_IN { color: #3b82f6; background: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.2); }
+.status-badge-glass.MEET_IN { color: #8b5cf6; background: rgba(139, 92, 246, 0.1); border-color: rgba(139, 92, 246, 0.2); }
+.status-badge-glass.MEET_OVER { color: #6b7280; background: rgba(107, 114, 128, 0.1); border-color: rgba(107, 114, 128, 0.2); }
+.status-badge-glass.GATE_OUT { color: var(--apple-text); background: rgba(0, 0, 0, 0.05); }
+.status-badge-glass.REJECTED { color: #ff3b30; background: rgba(255, 59, 48, 0.1); border-color: rgba(255, 59, 48, 0.2); }
+
+/* MISC APPLE UI */
+.apple-alert-info {
+  background: rgba(0, 113, 227, 0.08);
+  padding: 1.5rem 2rem;
+  border-radius: 20px;
+  border: 1px solid rgba(0, 113, 227, 0.1);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .error-text { color: #ff3b30; font-weight: 600; font-size: 0.9rem; margin-top: 1rem; }
+
+/* MOBILE RESPONSIVENESS */
+@media (max-width: 1024px) {
+  .admin-layout, .host-layout, .guard-layout {
+    grid-template-columns: 1fr;
+    height: auto;
+    overflow: visible;
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .admin-side-nav, .host-side-nav, .guard-side-nav {
+    padding: 1.5rem;
+    gap: 1.5rem;
+  }
+
+  .nav-group {
+    flex-direction: row;
+    overflow-x: auto;
+    padding-bottom: 8px;
+  }
+
+  .nav-group button {
+    flex: 0 0 auto;
+    padding: 10px 16px;
+    font-size: 0.9rem;
+  }
+
+  .admin-main, .host-main, .guard-main {
+    overflow-y: visible;
+    padding-right: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --safe-padding: 1.5rem;
+  }
+
+  .glass-card, .glass {
+    padding: 2rem;
+    border-radius: 24px;
+  }
+
+  .home-layout {
+    padding: 1rem;
+  }
+
+  .main-logo-text {
+    font-size: 3rem !important;
+  }
+
+  .v-name-text {
+    font-size: 1.8rem;
+  }
+
+  .v-identity {
+    flex-direction: column;
+    text-align: center;
+    gap: 1.5rem;
+  }
+
+  .vms-card-studio {
+    padding: 2rem;
+  }
+
+  .dash-stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .mini-stat strong {
+    font-size: 1.8rem;
+  }
+
+  .apple-btn-primary, .apple-btn-secondary {
+    padding: 12px 20px;
+    font-size: 0.9rem;
+  }
+
+  /* Visitor Page Polish */
+  .visitor-layout .wide-glass {
+    padding: 2rem !important;
+  }
+
+  .glass-form-grid {
+    grid-template-columns: 1fr !important;
+    gap: 2rem !important;
+  }
+
+  .capture-container {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .glass-card, .glass {
+    padding: 1.5rem;
+  }
+
+  .nav-logo {
+    font-size: 1.5rem;
+  }
+
+  .segmented-control button {
+    padding: 8px !important;
+    font-size: 0.8rem !important;
+  }
+
+  .apple-table td, .apple-table th {
+    padding: 12px 10px;
+    font-size: 0.8rem;
+  }
+
+  .v-photo-studio {
+    width: 100px;
+    height: 100px;
+  }
+}
 
 @media print {
   .no-print { display: none; }

@@ -8,41 +8,8 @@ export default function ClientWrapper({ children }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    const handleMouseMove = (e) => {
-      document.querySelectorAll(".glass-card, .glass").forEach((el) => {
-        const rect = el.getBoundingClientRect();
-        if (rect.width === 0 || rect.height === 0) return;
-
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
-        el.style.setProperty("--mouse-x", `${x}px`);
-        el.style.setProperty("--mouse-y", `${y}px`);
-
-        const tiltX = (y / rect.height - 0.5) * 5;
-        const tiltY = (x / rect.width - 0.5) * -5;
-        
-        if (!isNaN(tiltX) && !isNaN(tiltY)) {
-          el.style.setProperty("--tilt-x", `${tiltX}deg`);
-          el.style.setProperty("--tilt-y", `${tiltY}deg`);
-          el.style.setProperty("--active-tilt", "1");
-        }
-      });
-    };
-
-    const handleMouseLeave = () => {
-      document.querySelectorAll(".glass-card, .glass").forEach((el) => {
-        el.style.setProperty("--tilt-x", `0deg`);
-        el.style.setProperty("--tilt-y", `0deg`);
-        el.style.setProperty("--active-tilt", "0");
-      });
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-    document.body.addEventListener("mouseleave", handleMouseLeave);
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      document.body.removeEventListener("mouseleave", handleMouseLeave);
-    };
+    // Spatial effects are now handled internally by GlassCard components
+    // for significantly better performance and battery efficiency.
   }, []);
 
   return (

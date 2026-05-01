@@ -40,7 +40,7 @@ export default function LoginPage() {
     <div className="login-layout">
       <GlassCard className="main-glass" style={{ maxWidth: '440px' }}>
         <div className="login-header" style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-          <h1 className="main-logo-text" style={{ fontSize: '3.5rem' }}>{sysConfig.appName}</h1>
+          <h1 className="main-logo-text">{sysConfig.appName}</h1>
           <p className="text-secondary" style={{ fontWeight: 800, textTransform: 'uppercase', letterSpacing: '2px', marginTop: '0.5rem' }}>Staff Portal</p>
         </div>
         <form onSubmit={handleLogin} style={{ width: '100%' }}>

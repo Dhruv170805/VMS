@@ -41,21 +41,27 @@ function AdminPanelContent() {
 
   const fetchData = async () => {
     try {
-      const [vRes, eRes, logRes, allTodayRes, blRes] = await Promise.all([
-        fetchAuth(`${API_BASE}/visitor/pending`),
-        fetch(`${API_BASE}/employees`),
-        fetchAuth(`${API_BASE}/logs`),
-        fetchAuth(`${API_BASE}/dashboard/stats/detailed`),
-        fetchAuth(`${API_BASE}/blacklist`)
-      ]);
-      setPending(await vRes.json());
-      setEmployees(await eRes.json());
-      setLogs(await logRes.json());
-      const allToday = await allTodayRes.json();
-      setAllHistory(allToday);
-      setBlacklist(await blRes.json());
-      setActiveVisits(allToday.filter(v => ['GATE_IN', 'MEET_IN', 'MEET_OVER', 'APPROVED'].includes(v.status)));
-    } catch (err) { console.error(err); }
+      const vRes = await fetchAuth(`${API_BASE}/visitor/pending`);
+      if (vRes.ok) setPending(await vRes.json());
+
+      const eRes = await fetchAuth(`${API_BASE}/employees`);
+      if (eRes.ok) setEmployees(await eRes.json());
+
+      const logRes = await fetchAuth(`${API_BASE}/logs`);
+      if (logRes.ok) setLogs(await logRes.json());
+
+      const statsRes = await fetchAuth(`${API_BASE}/dashboard/stats/detailed`);
+      if (statsRes.ok) {
+        const allToday = await statsRes.json();
+        setAllHistory(allToday);
+        setActiveVisits(allToday.filter(v => ['GATE_IN', 'MEET_IN', 'MEET_OVER', 'APPROVED'].includes(v.status)));
+      }
+
+      const blRes = await fetchAuth(`${API_BASE}/blacklist`);
+      if (blRes.ok) setBlacklist(await blRes.json());
+    } catch (err) { 
+      console.error("Admin Fetch Error:", err); 
+    }
   };
 
   usePullToRefresh(fetchData);
@@ -156,7 +162,7 @@ function AdminPanelContent() {
               <table className="apple-table">
                 <thead><tr><th>Visitor</th><th>Details</th><th>Host</th><th>Actions</th></tr></thead>
                 <tbody>
-                  {pending.map(v => (
+                  {Array.isArray(pending) && pending.map(v => (
                     <tr key={v._id}>
                       <td>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
@@ -176,7 +182,7 @@ function AdminPanelContent() {
                   ))}
                 </tbody>
               </table>
-              {pending.length === 0 && <p className="text-secondary" style={{ textAlign: 'center', padding: '3rem' }}>No pending requests.</p>}
+              {(!pending || pending.length === 0) && <p className="text-secondary" style={{ textAlign: 'center', padding: '3rem' }}>No pending requests.</p>}
             </div>
           </GlassCard>
         )}
@@ -188,7 +194,7 @@ function AdminPanelContent() {
               <table className="apple-table">
                 <thead><tr><th>Visitor</th><th>Code</th><th>Status</th><th>Override</th></tr></thead>
                 <tbody>
-                  {activeVisits.map(v => (
+                  {Array.isArray(activeVisits) && activeVisits.map(v => (
                     <tr key={v._id}>
                       <td><strong>{v.name}</strong></td>
                       <td><code>{v.visitor_code}</code></td>
@@ -211,6 +217,7 @@ function AdminPanelContent() {
                   ))}
                 </tbody>
               </table>
+              {(!activeVisits || activeVisits.length === 0) && <p className="text-secondary" style={{ textAlign: 'center', padding: '3rem' }}>No visitors currently on site.</p>}
             </div>
           </GlassCard>
         )}
@@ -222,7 +229,7 @@ function AdminPanelContent() {
               <table className="apple-table">
                 <thead><tr><th>Time</th><th>Visitor</th><th>Host</th><th>Status</th></tr></thead>
                 <tbody>
-                  {allHistory.map(v => (
+                  {Array.isArray(allHistory) && allHistory.map(v => (
                     <tr key={v._id}>
                       <td>{new Date(v.created_at).toLocaleTimeString()}</td>
                       <td>
@@ -235,6 +242,7 @@ function AdminPanelContent() {
                   ))}
                 </tbody>
               </table>
+              {(!allHistory || allHistory.length === 0) && <p className="text-secondary" style={{ textAlign: 'center', padding: '3rem' }}>No historical records found.</p>}
             </div>
           </GlassCard>
         )}
@@ -254,19 +262,22 @@ function AdminPanelContent() {
             </GlassCard>
             <GlassCard className="main-glass">
               <h3>Current Directory</h3>
-              <table className="apple-table">
-                <thead><tr><th>Name</th><th>Department</th><th>Visibility</th><th>Action</th></tr></thead>
-                <tbody>
-                  {employees.map(e => (
-                    <tr key={e._id}>
-                      <td><strong>{e.name}</strong></td>
-                      <td>{e.department}</td>
-                      <td><span className={`apple-badge ${e.isActive ? 'success' : 'secondary'}`}>{e.isActive ? 'Active' : 'Hidden'}</span></td>
-                      <td><button className="apple-btn-sm" onClick={() => toggleEmployee(e._id)}>{e.isActive ? 'Hide' : 'Show'}</button></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <div className="apple-table-container">
+                <table className="apple-table">
+                  <thead><tr><th>Name</th><th>Department</th><th>Visibility</th><th>Action</th></tr></thead>
+                  <tbody>
+                    {Array.isArray(employees) && employees.map(e => (
+                      <tr key={e._id}>
+                        <td><strong>{e.name}</strong></td>
+                        <td>{e.department}</td>
+                        <td><span className={`apple-badge ${e.isActive ? 'success' : 'secondary'}`}>{e.isActive ? 'Active' : 'Hidden'}</span></td>
+                        <td><button className="apple-btn-sm" onClick={() => toggleEmployee(e._id)}>{e.isActive ? 'Hide' : 'Show'}</button></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {(!employees || employees.length === 0) && <p className="text-secondary" style={{ textAlign: 'center', padding: '3rem' }}>No staff members found.</p>}
+              </div>
             </GlassCard>
           </div>
         )}
@@ -274,38 +285,44 @@ function AdminPanelContent() {
         {tab === 'blacklist' && (
           <GlassCard className="main-glass">
             <h3>Banned Individuals</h3>
-            <table className="apple-table">
-              <thead><tr><th>Identifier</th><th>Type</th><th>Reason</th><th>Status</th></tr></thead>
-              <tbody>
-                {blacklist.map(b => (
-                  <tr key={b._id}>
-                    <td>{b.value}</td>
-                    <td>{b.type}</td>
-                    <td>{b.reason}</td>
-                    <td><button className="apple-badge danger" onClick={async () => { await fetchAuth(`${API_BASE}/blacklist/${b._id}`, { method: 'DELETE' }); fetchData(); }}>Unban</button></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="apple-table-container">
+              <table className="apple-table">
+                <thead><tr><th>Identifier</th><th>Type</th><th>Reason</th><th>Status</th></tr></thead>
+                <tbody>
+                  {Array.isArray(blacklist) && blacklist.map(b => (
+                    <tr key={b._id}>
+                      <td>{b.value}</td>
+                      <td>{b.type}</td>
+                      <td>{b.reason}</td>
+                      <td><button className="apple-badge danger" onClick={async () => { await fetchAuth(`${API_BASE}/blacklist/${b._id}`, { method: 'DELETE' }); fetchData(); }}>Unban</button></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {(!blacklist || blacklist.length === 0) && <p className="text-secondary" style={{ textAlign: 'center', padding: '3rem' }}>Blacklist is currently empty.</p>}
+            </div>
           </GlassCard>
         )}
 
         {tab === 'logs' && (
           <GlassCard className="main-glass">
             <h3>System Audit</h3>
-            <table className="apple-table">
-              <thead><tr><th>Time</th><th>Subject</th><th>Action</th><th>Actor</th></tr></thead>
-              <tbody>
-                {logs.map(l => (
-                  <tr key={l._id}>
-                    <td>{new Date(l.timestamp).toLocaleString()}</td>
-                    <td>{l.visitor_id?.name || 'System'}</td>
-                    <td>{l.event}</td>
-                    <td>{l.actor}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="apple-table-container">
+              <table className="apple-table">
+                <thead><tr><th>Time</th><th>Subject</th><th>Action</th><th>Actor</th></tr></thead>
+                <tbody>
+                  {Array.isArray(logs) && logs.map(l => (
+                    <tr key={l._id}>
+                      <td>{new Date(l.timestamp).toLocaleString()}</td>
+                      <td>{l.visitor_id?.name || 'System'}</td>
+                      <td>{l.event}</td>
+                      <td>{l.actor}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {(!logs || logs.length === 0) && <p className="text-secondary" style={{ textAlign: 'center', padding: '3rem' }}>No audit logs available.</p>}
+            </div>
           </GlassCard>
         )}
       </main>

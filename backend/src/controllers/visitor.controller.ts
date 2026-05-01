@@ -33,12 +33,19 @@ export const registerVisitor = async (req: Request, res: Response) => {
     const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
     const visitor_code = `${config.visitorCodePrefix}-${dateStr}-${randomStr}`;
 
+    // Normalize validity dates to full day boundaries
+    const fromDate = new Date(validatedData.validity.from);
+    fromDate.setHours(0, 0, 0, 0);
+    
+    const toDate = new Date(validatedData.validity.to);
+    toDate.setHours(23, 59, 59, 999);
+
     const visitor = new Visitor({
       ...validatedData,
       visitor_code,
       validity: {
-        from: new Date(validatedData.validity.from),
-        to: new Date(validatedData.validity.to)
+        from: fromDate,
+        to: toDate
       },
       status: 'PENDING'
     });
