@@ -4,8 +4,10 @@ import React, { useState, useEffect } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
 import { motion } from 'framer-motion';
 import { API_BASE } from '../utils/config';
+import { useConfig } from '@/context/ConfigContext';
 
 function DigitalPass({ pass, onBack }) {
+  const { config } = useConfig();
   const [currentPass, setCurrentPass] = useState(pass);
   const [polling, setPolling] = useState(pass.status === 'PENDING');
 
@@ -41,7 +43,7 @@ function DigitalPass({ pass, onBack }) {
       >
         <div className="vms-card-studio no-print-shadow">
           <div className="card-top">
-            <div className="logo-studio">VMS</div>
+            <div className="logo-studio">{config.appName}</div>
             <div className="status-badge-glass">{currentPass.status}</div>
           </div>
           
@@ -76,7 +78,7 @@ function DigitalPass({ pass, onBack }) {
           </div>
 
           <div className="card-bottom">
-            <span>ISSUED BY APPLE STUDIO VMS</span>
+            <span>ISSUED BY {config.companyName.toUpperCase()} {config.appName}</span>
           </div>
         </div>
 

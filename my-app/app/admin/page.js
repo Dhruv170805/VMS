@@ -105,7 +105,7 @@ function AdminPanelContent() {
   return (
     <div className="admin-layout">
       <nav className="admin-side-nav">
-        <h1 className="nav-logo">VMS</h1>
+        <h1 className="nav-logo">{sysConfig.appName}</h1>
         <div className="nav-group">
           <button className={tab === 'dashboard' ? 'active' : ''} onClick={() => { haptic('light'); setTab('dashboard'); }}>Dashboard</button>
           <button className={tab === 'pending' ? 'active' : ''} onClick={() => { haptic('light'); setTab('pending'); }}>Pending ({pending.length})</button>
