@@ -278,6 +278,25 @@ function LoginPage() {
   );
 }
 
+// --- Configuration Constants ---
+const VISIT_PURPOSES = [
+  { value: 'OFFICE', label: 'Office Visit' },
+  { value: 'INTERNSHIP', label: 'Internship' },
+  { value: 'TRAINING', label: 'Training' },
+  { value: 'DELIVERY', label: 'Delivery' },
+  { value: 'INTERVIEW', label: 'Interview' },
+  { value: 'OTHER', label: 'Other' }
+];
+
+const ID_TYPES = [
+  { value: 'AADHAR', label: 'Aadhar Card' },
+  { value: 'PAN', label: 'PAN Card' },
+  { value: 'DRIVING_LICENSE', label: 'Driving License' },
+  { value: 'ELECTION_CARD', label: 'Voter ID' },
+  { value: 'PASSPORT', label: 'Passport' },
+  { value: 'OTHER', label: 'Other' }
+];
+
 function VisitorForm() {
   const [step, setStep] = useState(1);
   const [employees, setEmployees] = useState([]);
@@ -319,7 +338,7 @@ function VisitorForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.photo_base64 || !formData.id_photo_base64) {
-      setError("Identity capture is required.");
+      setError("Both photo and ID capture are required.");
       return;
     }
     setLoading(true);
@@ -351,7 +370,7 @@ function VisitorForm() {
     <div className="visitor-layout fade-in">
       <GlassCard className="wide-glass main-glass">
         <div className="glass-header">
-          <h2>Registration</h2>
+          <h2>Visitor Registration</h2>
         </div>
 
         {step === 1 ? (
@@ -365,15 +384,14 @@ function VisitorForm() {
             </div>
             {error && <p className="error-text">{error}</p>}
             <div className="form-actions-glass">
-              <Link to="/" className="apple-btn-secondary">Back</Link>
-              <button onClick={checkIdentity} disabled={loading} className="apple-btn-primary flex-1">
-                {loading ? 'Processing...' : 'Continue'}
+              <button onClick={checkIdentity} disabled={loading} className="apple-btn-primary full-width">
+                {loading ? 'Verifying...' : 'Continue'}
               </button>
             </div>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="advanced-form-glass">
-            {isReturning && <div className="apple-banner-success">Welcome back! Identity verified.</div>}
+            {isReturning && <div className="apple-banner-success">✨ Welcome back! Your identity has been verified.</div>}
             <div className="step-indicator">Step 2 of 2</div>
             
             <div className="glass-form-grid">
@@ -381,13 +399,10 @@ function VisitorForm() {
                 <h4>Visit Details</h4>
                 <div className="apple-input-group-vertical">
                   <select value={formData.purpose} onChange={e => setFormData({...formData, purpose: e.target.value})}>
-                    <option value="OFFICE">Office Visit</option>
-                    <option value="INTERNSHIP">Internship</option>
-                    <option value="TRAINING">Training</option>
-                    <option value="OTHER">Other</option>
+                    {VISIT_PURPOSES.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
                   </select>
                   <select required value={formData.host_id} onChange={e => setFormData({...formData, host_id: e.target.value})}>
-                    <option value="">To whom want to meet?</option>
+                    <option value="">Who would you like to meet?</option>
                     {employees.map(emp => (
                       <option key={emp._id} value={emp._id}>{emp.name} ({emp.department})</option>
                     ))}
@@ -400,16 +415,12 @@ function VisitorForm() {
                   <div className="form-section-glass">
                     <h4>Personal Details</h4>
                     <div className="apple-input-group-vertical">
-                      <input type="email" placeholder="Email" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
-                      <input type="text" placeholder="Company Name" required value={formData.company} onChange={e => setFormData({...formData, company: e.target.value})} />
+                      <input type="email" placeholder="Email Address" required value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+                      <input type="text" placeholder="Company / Organization" required value={formData.company} onChange={e => setFormData({...formData, company: e.target.value})} />
                       <select value={formData.id_type} onChange={e => setFormData({...formData, id_type: e.target.value})}>
-                        <option value="AADHAR">Aadhar Card</option>
-                        <option value="PAN">PAN Card</option>
-                        <option value="DRIVING_LICENSE">Driving License</option>
-                        <option value="ELECTION_CARD">Election Card</option>
-                        <option value="OTHER">Other</option>
+                        {ID_TYPES.map(id => <option key={id.value} value={id.value}>{id.label}</option>)}
                       </select>
-                      <input type="text" placeholder="ID Number" required value={formData.id_number} onChange={e => setFormData({...formData, id_number: e.target.value})} />
+                      <input type="text" placeholder="ID Card Number" required value={formData.id_number} onChange={e => setFormData({...formData, id_number: e.target.value})} />
                     </div>
                   </div>
 
@@ -421,7 +432,7 @@ function VisitorForm() {
                         {formData.photo_base64 && <img src={formData.photo_base64} className="preview-img-glass" />}
                       </div>
                       <div className="capture-box-glass">
-                        <h5>ID Document</h5>
+                        <h5>ID Document Scan</h5>
                         <CameraCapture onCapture={(img) => setFormData({...formData, id_photo_base64: img})} />
                         {formData.id_photo_base64 && <img src={formData.id_photo_base64} className="preview-img-glass" />}
                       </div>
@@ -432,9 +443,9 @@ function VisitorForm() {
             </div>
 
             <div className="form-actions-glass">
-              <button type="button" className="apple-btn-secondary" onClick={() => setStep(1)}>Back</button>
+              <button type="button" className="apple-btn-secondary" onClick={() => setStep(1)}>Back to Step 1</button>
               <button type="submit" className="apple-btn-primary flex-1" disabled={loading}>
-                {loading ? 'Submitting...' : 'Register Visit'}
+                {loading ? 'Registering...' : 'Register Visit & Generate Pass'}
               </button>
             </div>
             {error && <p className="error-text">{error}</p>}
@@ -448,9 +459,26 @@ function VisitorForm() {
 function CameraCapture({ onCapture }) {
   const webcamRef = useRef(null);
   const [isCamera, setIsCamera] = useState(false);
+  
   const capture = useCallback(() => {
     const imageSrc = webcamRef.current.getScreenshot();
-    onCapture(imageSrc);
+    
+    // Bug 5 fix: Compress/Resize image using canvas
+    const img = new Image();
+    img.src = imageSrc;
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      const MAX_WIDTH = 400; // Limit size to save DB space
+      const scale = MAX_WIDTH / img.width;
+      canvas.width = MAX_WIDTH;
+      canvas.height = img.height * scale;
+      
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      const compressed = canvas.toDataURL('image/jpeg', 0.7); // 70% quality
+      onCapture(compressed);
+    };
+    
     setIsCamera(false);
   }, [webcamRef, onCapture]);
 
@@ -966,12 +994,15 @@ function HostDashboard() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState('pending');
   const navigate = useNavigate();
-  const userId = localStorage.getItem('userId');
+  // Bug 7 Fix: Use employeeId instead of userId
+  const hostId = localStorage.getItem('employeeId') || localStorage.getItem('userId');
   const name = localStorage.getItem('name');
 
   const fetchData = async () => {
     try {
-      const res = await fetch(`${API_BASE}/visitor/host/${userId}`);
+      const res = await fetch(`${API_BASE}/visitor/host/${hostId}`, {
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+      });
       const data = await res.json();
       setVisitors(data);
     } catch (err) { console.error(err); }
@@ -1111,7 +1142,7 @@ function App() {
         const tiltY = (x / rect.width - 0.5) * -5; // Max 5 degrees
         el.style.setProperty("--tilt-x", `${tiltX}deg`);
         el.style.setProperty("--tilt-y", `${tiltY}deg`);
-        el.style.transform = `translateY(-8px) scale(1.02) rotateX(var(--tilt-x)) rotateY(var(--tilt-y))`;
+        el.style.setProperty("--active-tilt", "1");
       });
     };
 
@@ -1119,7 +1150,7 @@ function App() {
       document.querySelectorAll(".glass-card, .glass").forEach((el) => {
         el.style.setProperty("--tilt-x", `0deg`);
         el.style.setProperty("--tilt-y", `0deg`);
-        el.style.transform = "translateY(0) scale(1) rotateX(0) rotateY(0)";
+        el.style.setProperty("--active-tilt", "0");
       });
     };
 

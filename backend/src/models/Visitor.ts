@@ -17,7 +17,7 @@ export interface IVisitor extends Document {
     to: Date;
   };
   status: 'PENDING' | 'APPROVED' | 'REJECTED' | 'GATE_IN' | 'MEET_IN' | 'MEET_OVER' | 'GATE_OUT';
-  timestamps: {
+  visit_timestamps: {
     approved_at?: Date;
     gate_in_at?: Date;
     meet_in_at?: Date;
@@ -57,7 +57,7 @@ const VisitorSchema: Schema = new Schema({
     default: 'PENDING',
     index: true
   },
-  timestamps: {
+  visit_timestamps: {
     approved_at: { type: Date },
     gate_in_at: { type: Date },
     meet_in_at: { type: Date },

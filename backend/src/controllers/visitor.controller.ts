@@ -92,7 +92,7 @@ export const approveVisitor = async (req: Request, res: Response) => {
     
     const updateData: any = { status };
     if (status === 'APPROVED') {
-      updateData['timestamps.approved_at'] = new Date();
+      updateData['visit_timestamps.approved_at'] = new Date();
     }
 
     const visitor = await Visitor.findByIdAndUpdate(id, updateData, { new: true }).populate('host_id');
@@ -186,7 +186,7 @@ export const updateVisitorStatus = async (req: Request, res: Response) => {
 
     const timestampField = status.toLowerCase() + '_at';
     const updateData: any = { status };
-    updateData[`timestamps.${timestampField}`] = new Date();
+    updateData[`visit_timestamps.${timestampField}`] = new Date();
 
     const visitor = await Visitor.findByIdAndUpdate(id, updateData, { new: true });
     if (!visitor) return res.status(404).json({ error: 'Visitor not found' });

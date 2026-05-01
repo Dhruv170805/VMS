@@ -30,7 +30,13 @@ export const login = async (req: Request, res: Response) => {
 // Helper for initial setup (remove in production)
 export const register = async (req: Request, res: Response) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, setupKey } = req.body;
+    
+    // Bug 15 Fix: Protect public registration with a simple key check
+    if (setupKey !== process.env.SETUP_KEY && process.env.NODE_ENV === 'production') {
+      return res.status(403).json({ error: 'Forbidden: Registration is restricted' });
+    }
+
     const user = new User({ name, email, password, role });
     await user.save();
     res.status(201).json({ message: 'User created' });
