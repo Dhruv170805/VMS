@@ -35,16 +35,16 @@ export default function Dashboard() {
 
   const data = [
     { name: 'Pending', value: stats.PENDING, color: '#f59e0b' },
-    { name: 'Approved', value: stats.APPROVED, color: '#3b82f6' },
-    { name: 'On Premises', value: stats.GATE_IN + stats.MEET_IN + stats.MEET_OVER, color: '#10b981' },
-    { name: 'Completed', value: stats.GATE_OUT, color: '#64748b' }
+    { name: 'On Site', value: stats.GATE_IN + stats.MEET_IN + stats.MEET_OVER, color: '#3b82f6' },
+    { name: 'Departed', value: stats.GATE_OUT, color: '#10b981' },
+    { name: 'Rejected', value: stats.REJECTED, color: '#ff3b30' }
   ];
 
   const container = {
-    hidden: { opacity: 0 },
+    hidden: { opacity: 0, scale: 0.95 },
     show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.15 }
+      opacity: 1, scale: 1,
+      transition: { staggerChildren: 0.1, duration: 0.6, ease: [0.22, 1, 0.36, 1] }
     }
   };
 
@@ -59,46 +59,82 @@ export default function Dashboard() {
       variants={container}
       initial="hidden"
       animate="show"
+      style={{ width: '100%' }}
     >
-      <motion.div className="dash-row" variants={item}>
-        <GlassCard className="dash-chart-card main-glass">
-          <h3>Visit Status Distribution</h3>
-          <div className="chart-container">
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie data={data} innerRadius={60} outerRadius={80} paddingAngle={5} dataKey="value">
-                  {data.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="chart-legend">
-              {data.map(d => <div key={d.name} className="legend-item"><span style={{background: d.color}}></span>{d.name}: {d.value}</div>)}
+      <div className="dash-stats-grid">
+        <motion.div variants={item}>
+          <GlassCard className="mini-stat">
+            <span className="text-secondary">Expected Today</span>
+            <strong><AnimatedNumber value={stats.TOTAL} /></strong>
+          </GlassCard>
+        </motion.div>
+        <motion.div variants={item}>
+          <GlassCard className="mini-stat">
+            <span style={{ color: '#10b981' }}>Currently In</span>
+            <strong style={{ color: '#10b981' }}><AnimatedNumber value={stats.GATE_IN + stats.MEET_IN + stats.MEET_OVER} /></strong>
+          </GlassCard>
+        </motion.div>
+        <motion.div variants={item}>
+          <GlassCard className="mini-stat">
+            <span style={{ color: '#f59e0b' }}>Pending Action</span>
+            <strong style={{ color: '#f59e0b' }}><AnimatedNumber value={stats.PENDING} /></strong>
+          </GlassCard>
+        </motion.div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '24px', marginTop: '24px' }}>
+        <motion.div variants={item}>
+          <GlassCard className="main-glass" style={{ padding: '2.5rem' }}>
+            <h3 style={{ marginBottom: '2rem' }}>Traffic Overview</h3>
+            <div style={{ height: 320 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={data} innerRadius={80} outerRadius={110} paddingAngle={8} dataKey="value" stroke="none">
+                    {data.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', backdropFilter: 'blur(10px)' }} 
+                  />
+                </PieChart>
+              </ResponsiveContainer>
             </div>
-          </div>
-        </GlassCard>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1.5rem', justifyContent: 'center', marginTop: '1rem' }}>
+              {data.map(d => (
+                <div key={d.name} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', fontWeight: 700 }}>
+                  <span style={{ width: 12, height: 12, borderRadius: '4px', background: d.color }}></span>
+                  {d.name}
+                </div>
+              ))}
+            </div>
+          </GlassCard>
+        </motion.div>
 
-        <GlassCard className="dash-chart-card main-glass">
-          <h3>Activity Trend (Today)</h3>
-          <div className="chart-container">
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={stats.trendData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
-                <XAxis dataKey="hour" axisLine={false} tickLine={false} />
-                <YAxis axisLine={false} tickLine={false} allowDecimals={false} />
-                <Tooltip cursor={{fill: '#f1f5f9'}} />
-                <Bar dataKey="count" fill="#3b82f6" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </GlassCard>
-      </motion.div>
-
-      <motion.div className="dash-stats-grid" variants={item}>
-        <GlassCard className="mini-glass"><span>Rejected</span><strong><AnimatedNumber value={stats.REJECTED} /></strong></GlassCard>
-        <GlassCard className="mini-glass"><span>Host Meetings</span><strong><AnimatedNumber value={stats.MEET_IN} /></strong></GlassCard>
-        <GlassCard className="mini-glass highlight"><span>Total Traffic</span><strong><AnimatedNumber value={stats.TOTAL} /></strong></GlassCard>
-      </motion.div>
+        <motion.div variants={item}>
+          <GlassCard className="main-glass" style={{ padding: '2.5rem' }}>
+            <h3 style={{ marginBottom: '2rem' }}>Hourly Activity</h3>
+            <div style={{ height: 320 }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={stats.trendData}>
+                  <defs>
+                    <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#3b82f6" stopOpacity={1} />
+                      <stop offset="100%" stopColor="#3b82f6" stopOpacity={0.6} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
+                  <XAxis dataKey="hour" axisLine={false} tickLine={false} tick={{ fontSize: 11, fontWeight: 700 }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fontWeight: 700 }} />
+                  <Tooltip 
+                    cursor={{ fill: 'rgba(0,0,0,0.02)' }}
+                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', backdropFilter: 'blur(10px)' }}
+                  />
+                  <Bar dataKey="count" fill="url(#barGradient)" radius={[6, 6, 0, 0]} barSize={32} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </GlassCard>
+        </motion.div>
+      </div>
     </motion.div>
   );
 }

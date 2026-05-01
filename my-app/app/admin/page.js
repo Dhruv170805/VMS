@@ -152,33 +152,31 @@ function AdminPanelContent() {
         {tab === 'pending' && (
           <GlassCard className="main-glass">
             <h3 className="card-title">Access Requests</h3>
-            <div className="table-container">
+            <div className="apple-table-container">
               <table className="apple-table">
-                <thead><tr><th>Visitor</th><th>Photo</th><th>Host</th><th>Actions</th></tr></thead>
+                <thead><tr><th>Visitor</th><th>Details</th><th>Host</th><th>Actions</th></tr></thead>
                 <tbody>
                   {pending.map(v => (
                     <tr key={v._id}>
-                      <td colSpan="4" style={{ padding: 0 }}>
-                        <SwipeableItem 
-                          onSwipeRight={() => updateStatus(v._id, 'APPROVED')}
-                          onSwipeLeft={() => updateStatus(v._id, 'REJECTED')}
-                        >
-                          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', width: '100%', padding: '1.5rem', background: 'rgba(255,255,255,0.04)', borderRadius: '24px' }}>
-                            <div className="name-cell"><strong>{v.name}</strong><small>{v.company}</small></div>
-                            <div><img src={v.photo_base64} className="table-thumb" /></div>
-                            <div>{v.host_id?.name}</div>
-                            <div className="action-btns">
-                              <button className="apple-badge success" onClick={() => updateStatus(v._id, 'APPROVED')}>Approve</button>
-                              <button className="apple-badge danger" onClick={() => updateStatus(v._id, 'REJECTED')}>Reject</button>
-                              <button className="apple-badge secondary" onClick={() => addToBlacklist(v.email, 'EMAIL')}>Ban</button>
-                            </div>
-                          </div>
-                        </SwipeableItem>
+                      <td>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                          <img src={v.photo_base64} className="list-avatar" />
+                          <div><strong>{v.name}</strong><small className="text-secondary">{v.company}</small></div>
+                        </div>
+                      </td>
+                      <td>{v.purpose}</td>
+                      <td>{v.host_id?.name}</td>
+                      <td>
+                        <div className="action-btns" style={{ display: 'flex', gap: '8px' }}>
+                          <button className="apple-btn-sm" style={{ background: '#34c759', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '8px', fontWeight: 700 }} onClick={() => updateStatus(v._id, 'APPROVED')}>Approve</button>
+                          <button className="apple-btn-sm" style={{ background: '#ff3b30', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '8px', fontWeight: 700 }} onClick={() => updateStatus(v._id, 'REJECTED')}>Reject</button>
+                        </div>
                       </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
+              {pending.length === 0 && <p className="text-secondary" style={{ textAlign: 'center', padding: '3rem' }}>No pending requests.</p>}
             </div>
           </GlassCard>
         )}
@@ -186,7 +184,7 @@ function AdminPanelContent() {
         {tab === 'active' && (
           <GlassCard className="main-glass">
             <h3 className="card-title">Live Premises Tracking</h3>
-            <div className="table-container">
+            <div className="apple-table-container">
               <table className="apple-table">
                 <thead><tr><th>Visitor</th><th>Code</th><th>Status</th><th>Override</th></tr></thead>
                 <tbody>
@@ -194,9 +192,14 @@ function AdminPanelContent() {
                     <tr key={v._id}>
                       <td><strong>{v.name}</strong></td>
                       <td><code>{v.visitor_code}</code></td>
-                      <td><span className={`apple-badge-status ${v.status}`}>{v.status}</span></td>
+                      <td><span className={`status-badge-glass ${v.status}`}>{v.status}</span></td>
                       <td>
-                        <select className="apple-select" value={v.status} onChange={(e) => updateStatus(v._id, e.target.value)}>
+                        <select 
+                          className="apple-select" 
+                          style={{ background: 'rgba(0,0,0,0.05)', border: 'none', padding: '6px 12px', borderRadius: '8px', fontWeight: 600 }}
+                          value={v.status} 
+                          onChange={(e) => updateStatus(v._id, e.target.value)}
+                        >
                           <option value="APPROVED">Approved</option>
                           <option value="GATE_IN">Gate In</option>
                           <option value="MEET_IN">Meet In</option>
@@ -215,16 +218,19 @@ function AdminPanelContent() {
         {tab === 'history' && (
           <GlassCard className="main-glass">
             <h3 className="card-title">Global History</h3>
-            <div className="table-container">
+            <div className="apple-table-container">
               <table className="apple-table">
                 <thead><tr><th>Time</th><th>Visitor</th><th>Host</th><th>Status</th></tr></thead>
                 <tbody>
                   {allHistory.map(v => (
                     <tr key={v._id}>
                       <td>{new Date(v.created_at).toLocaleTimeString()}</td>
-                      <td><strong>{v.name}</strong><br/><small>{v.phone}</small></td>
+                      <td>
+                        <strong>{v.name}</strong>
+                        <div className="text-secondary" style={{ fontSize: '0.8rem' }}>{v.phone}</div>
+                      </td>
                       <td>{v.host_id?.name}</td>
-                      <td><span className={`apple-badge-status ${v.status}`}>{v.status}</span></td>
+                      <td><span className={`status-badge-glass ${v.status}`}>{v.status}</span></td>
                     </tr>
                   ))}
                 </tbody>
