@@ -8,8 +8,9 @@ export async function POST(req) {
   try {
     await connectDB();
     const { email, password } = await req.json();
+    const normalizedEmail = email.toLowerCase();
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email: normalizedEmail });
     if (!user) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
     }
