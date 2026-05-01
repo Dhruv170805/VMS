@@ -1,13 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: 'http://127.0.0.1:5001/api/:path*',
-      },
-    ];
-  },
+  /* API is now integrated via app/api routes */
 };
 
 export default nextConfig;
