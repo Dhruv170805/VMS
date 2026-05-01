@@ -29,9 +29,9 @@ export default function Dashboard() {
 
   useEffect(() => { 
     fetchAuth(`${API_BASE}/dashboard/stats`)
-      .then(r => {
+      .then(async r => {
         if (!r.ok) throw new Error('Failed to fetch stats');
-        return r.json();
+        return await safeJson(r);
       })
       .then(setStats)
       .catch(err => {
@@ -156,6 +156,4 @@ export default function Dashboard() {
       </div>
     </motion.div>
   );
-}
-);
 }
