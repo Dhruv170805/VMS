@@ -21,8 +21,12 @@ function AdminPanelContent() {
   const [tab, setTab] = useState('dashboard');
   const [file, setFile] = useState(null);
   const [settings, setSettings] = useState({});
+  const [adminName, setAdminName] = useState('');
 
-  useEffect(() => { setSettings(sysConfig); }, [sysConfig]);
+  useEffect(() => { 
+    setSettings(sysConfig); 
+    setAdminName(localStorage.getItem('name'));
+  }, [sysConfig]);
 
   const router = useRouter();
 
@@ -41,7 +45,6 @@ function AdminPanelContent() {
 
   const fetchData = async () => {
     try {
-      // Parallel fetch to prevent UI blocking
       const [vRes, eRes, logRes, statsRes, blRes] = await Promise.all([
         fetchAuth(`${API_BASE}/visitor/pending`),
         fetchAuth(`${API_BASE}/employees`),
@@ -119,6 +122,10 @@ function AdminPanelContent() {
     <div className="admin-layout">
       <nav className="admin-side-nav">
         <h1 className="nav-logo">{sysConfig.appName}</h1>
+        <div className="user-welcome">
+          <span className="text-secondary" style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase' }}>Administrator</span>
+          <h2>{adminName}</h2>
+        </div>
         <div className="nav-group">
           <button className={tab === 'dashboard' ? 'active' : ''} onClick={() => { haptic('light'); setTab('dashboard'); }}>Dashboard</button>
           <button className={tab === 'pending' ? 'active' : ''} onClick={() => { haptic('light'); setTab('pending'); }}>Pending ({pending.length})</button>

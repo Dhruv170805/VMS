@@ -13,7 +13,12 @@ function GuardPanelContent() {
   const [input, setInput] = useState('');
   const [msg, setMsg] = useState(null);
   const [stats, setStats] = useState(null);
+  const [name, setName] = useState('');
   const router = useRouter();
+
+  useEffect(() => {
+    setName(localStorage.getItem('name'));
+  }, []);
 
   const fetchStats = async () => {
     try {
@@ -57,6 +62,10 @@ function GuardPanelContent() {
     <div className="guard-layout">
       <nav className="guard-side-nav">
         <h1 className="nav-logo">{sysConfig.appName}</h1>
+        <div className="user-welcome">
+          <span className="text-secondary" style={{ fontSize: '0.8rem', fontWeight: 800, textTransform: 'uppercase' }}>Duty Guard</span>
+          <h2>{name}</h2>
+        </div>
         <div className="nav-group">
           <button className="active">Access Control</button>
         </div>
