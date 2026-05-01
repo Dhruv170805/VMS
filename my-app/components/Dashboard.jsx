@@ -108,11 +108,28 @@ export default function Dashboard() {
             <div style={{ height: 320 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
-                  <Pie data={data} innerRadius={80} outerRadius={110} paddingAngle={8} dataKey="value" stroke="none">
-                    {data.map((entry, index) => <Cell key={`cell-${index}`} fill={entry.color} />)}
+                  <Pie 
+                    data={data} 
+                    innerRadius={90} 
+                    outerRadius={125} 
+                    paddingAngle={10} 
+                    dataKey="value" 
+                    stroke="none"
+                  >
+                    {data.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} style={{ filter: `drop-shadow(0 8px 15px ${entry.color}44)` }} />
+                    ))}
                   </Pie>
                   <Tooltip 
-                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', backdropFilter: 'blur(10px)' }} 
+                    contentStyle={{ 
+                      borderRadius: '24px', 
+                      border: '1.5px solid rgba(255,255,255,0.7)', 
+                      boxShadow: '0 20px 40px rgba(0,0,0,0.1)', 
+                      backdropFilter: 'blur(20px) saturate(200%)',
+                      background: 'rgba(255,255,255,0.6)',
+                      padding: '12px 20px',
+                      fontWeight: 800
+                    }} 
                   />
                 </PieChart>
               </ResponsiveContainer>
