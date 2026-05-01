@@ -43,7 +43,7 @@ export const getEmployees = async (req: Request, res: Response) => {
     const { activeOnly } = req.query;
     const filter = activeOnly === 'true' ? { isActive: true } : {};
     
-    // SECURITY: If not authenticated as Admin, only return basic info
+    // SECURITY: If not authenticated or not an Admin, strictly project public fields
     const isAdmin = req.user && req.user.role === 'ADMIN';
     const projection = isAdmin ? {} : { name: 1, department: 1, _id: 1 };
 

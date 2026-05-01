@@ -17,11 +17,25 @@ function HostDashboardContent() {
   const [hostId, setHostId] = useState(null);
   const [name, setName] = useState('');
   const [error, setError] = useState(null);
+  const [now, setNow] = useState(new Date());
   const router = useRouter();
 
   useEffect(() => {
-    setHostId(localStorage.getItem('employeeId') || localStorage.getItem('userId'));
+    // SECURITY: Strictly use employeeId for meeting linkage
+    const eId = localStorage.getItem('employeeId');
+    if (!eId) {
+      setError("No Staff Account linked. Access restricted.");
+      setLoading(false);
+      return;
+    }
+    setHostId(eId);
     setName(localStorage.getItem('name'));
+  }, []);
+
+  // Real-time ticker for Meeting Timer
+  useEffect(() => {
+    const ticker = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(ticker);
   }, []);
 
   const fetchData = async () => {
@@ -54,24 +68,36 @@ function HostDashboardContent() {
 
   const handleAction = async (id, status) => {
     haptic('light');
+    // Optimistic Update
+    setVisitors(prev => prev.filter(v => v._id !== id));
+    
     const res = await fetchAuth(`${API_BASE}/visitor/${id}/approve`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status })
     });
-    if (res.ok) haptic('success'); else haptic('error');
-    fetchData();
+    if (res.ok) haptic('success'); else {
+      haptic('error');
+      fetchData(); // Rollback on failure
+    }
   };
 
   const updateStatus = async (id, status) => {
     haptic('light');
+    // Optimistic Update for "Meeting Over"
+    if (status === 'MEET_OVER') {
+      setVisitors(prev => prev.map(v => v._id === id ? {...v, status} : v));
+    }
+
     const res = await fetchAuth(`${API_BASE}/visitor/${id}/status`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status })
     });
-    if (res.ok) haptic('medium'); else haptic('error');
-    fetchData();
+    if (res.ok) haptic('medium'); else {
+      haptic('error');
+      fetchData();
+    }
   };
 
   const handleLogout = () => {
@@ -153,7 +179,7 @@ function HostDashboardContent() {
                       <span className={`status-badge-glass ${v.status}`} style={{ marginTop: '0.5rem', display: 'inline-block' }}>{v.status}</span>
                       {v.status === 'MEET_IN' && v.visit_timestamps.meet_in_at && (
                         <div className="meeting-timer">
-                          <span>⏱️</span> {Math.max(0, Math.floor((new Date() - new Date(v.visit_timestamps.meet_in_at)) / 60000))} mins
+                          <span>⏱️</span> {Math.max(0, Math.floor((now - new Date(v.visit_timestamps.meet_in_at)) / 60000))}m {Math.floor((now - new Date(v.visit_timestamps.meet_in_at)) / 1000) % 60}s
                         </div>
                       )}
                     </div>

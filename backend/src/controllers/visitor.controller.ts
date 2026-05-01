@@ -145,9 +145,9 @@ export const getVisitorProfile = async (req: Request, res: Response) => {
     const phone = req.query.phone as string;
     if (!name || !phone) return res.status(400).json({ error: 'Name and Phone required' });
 
-    // Find the most recent record for this visitor (Case-Insensitive Search)
+    // Find the most recent record for this visitor (Case-Insensitive Regex Search)
     const visitor = await Visitor.findOne({ 
-      name: { $regex: new RegExp(`^${name}$`, 'i') }, 
+      name: { $regex: new RegExp(`^${name.trim()}$`, 'i') }, 
       phone 
     }).sort({ created_at: -1 });
 

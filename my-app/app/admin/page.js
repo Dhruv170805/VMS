@@ -82,13 +82,19 @@ function AdminPanelContent() {
 
   const updateStatus = async (id, status) => {
     haptic('light');
+    // Optimistic local state update
+    if (tab === 'pending') setPending(prev => prev.filter(v => v._id !== id));
+    if (tab === 'active' && status === 'GATE_OUT') setActiveVisits(prev => prev.filter(v => v._id !== id));
+
     const res = await fetchAuth(`${API_BASE}/visitor/${id}/status`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status })
     });
-    if (res.ok) haptic('success'); else haptic('error');
-    fetchData();
+    if (res.ok) haptic('success'); else {
+      haptic('error');
+      fetchData(); // Re-sync on failure
+    }
   };
 
   const toggleEmployee = async (id) => {

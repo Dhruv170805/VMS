@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState, useEffect } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
 import { motion } from 'framer-motion';
@@ -5,7 +7,7 @@ import { API_BASE, safeJson } from '../utils/config';
 import { useConfig } from '@/context/ConfigContext';
 
 function DigitalPass({ pass, onBack }) {
-  const { config } = useConfig();
+  const { config, refreshConfig } = useConfig();
   const [currentPass, setCurrentPass] = useState(pass);
   const [polling, setPolling] = useState(pass.status === 'PENDING');
   const [timeLeft, setTimeLeft] = useState('');
@@ -37,6 +39,9 @@ function DigitalPass({ pass, onBack }) {
     if (!polling) return;
     const interval = setInterval(async () => {
       try {
+        // Sync branding every poll cycle
+        refreshConfig();
+
         const res = await fetch(`${API_BASE}/visitor/track/${currentPass.visitor_code}`);
         if (res.ok) {
           const data = await safeJson(res);
@@ -53,7 +58,7 @@ function DigitalPass({ pass, onBack }) {
       } catch (err) { console.error(err); }
     }, 5000);
     return () => clearInterval(interval);
-  }, [polling, currentPass.visitor_code]);
+  }, [polling, currentPass.visitor_code, refreshConfig]);
 
   const handlePrint = () => window.print();
 
@@ -98,7 +103,10 @@ function DigitalPass({ pass, onBack }) {
 
               <div className="validity-studio">
                 <div className="v-label">IDENTITY VALID UNTIL</div>
-                <div className="v-time">{new Date(currentPass.validity.to).toLocaleDateString()} • 23:59 PM</div>
+                <div className="v-time" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span>{new Date(currentPass.validity.to).toLocaleDateString()} • 23:59 PM</span>
+                  <span style={{ fontSize: '0.7rem', color: isExpired ? '#ff3b30' : 'var(--apple-blue)', fontWeight: 800 }}>{timeLeft}</span>
+                </div>
               </div>
             </div>
           </div>
