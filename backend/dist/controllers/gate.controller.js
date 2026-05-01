@@ -12,7 +12,7 @@ const checkIn = async (req, res) => {
         const { token, visitorCode } = req.body;
         let visitor;
         if (token) {
-            const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET || 'vms_secret');
+            const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
             visitor = await Visitor_1.default.findById(decoded.visitorId);
         }
         else if (visitorCode) {
@@ -42,7 +42,7 @@ const checkOut = async (req, res) => {
         const { token, visitorCode } = req.body;
         let visitor;
         if (token) {
-            const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET || 'vms_secret');
+            const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
             visitor = await Visitor_1.default.findById(decoded.visitorId);
         }
         else if (visitorCode) {

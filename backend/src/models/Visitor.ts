@@ -69,7 +69,6 @@ const VisitorSchema: Schema = new Schema({
 
 // Index for status queries
 VisitorSchema.index({ email: 1 });
-VisitorSchema.index({ visitor_code: 1 });
 VisitorSchema.index({ name: 1, phone: 1 });
 
 export default mongoose.model<IVisitor>('Visitor', VisitorSchema);

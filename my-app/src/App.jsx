@@ -5,7 +5,7 @@ import Webcam from 'react-webcam';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import './App.css';
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5001/api';
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://127.0.0.1:5001/api';
 
 // --- Haptic Engine ---
 const haptic = (type = 'light') => {
@@ -339,9 +339,7 @@ function VisitorForm() {
     <div className="visitor-layout fade-in">
       <GlassCard className="wide-glass main-glass">
         <div className="glass-header">
-          <Link to="/" className="back-btn-glass">← Back</Link>
           <h2>Registration</h2>
-          <div style={{ width: '60px' }}></div> {/* Spacer for balance */}
         </div>
 
         {step === 1 ? (

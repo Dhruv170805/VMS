@@ -1,6 +1,14 @@
 import { Router } from 'express';
 import multer from 'multer';
-import { registerVisitor, getPendingVisitors, approveVisitor, updateVisitorStatus } from '../controllers/visitor.controller';
+import { 
+  registerVisitor, 
+  getPendingVisitors, 
+  approveVisitor, 
+  updateVisitorStatus,
+  getHostVisitors,
+  getVisitorProfile,
+  getVisitorByCode
+} from '../controllers/visitor.controller';
 import { checkIn, checkOut } from '../controllers/gate.controller';
 import { getStats, getDetailedStats } from '../controllers/dashboard.controller';
 import { uploadEmployees, getEmployees, toggleEmployeeStatus } from '../controllers/employee.controller';

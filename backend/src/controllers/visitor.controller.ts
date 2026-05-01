@@ -7,6 +7,7 @@ import jwt from 'jsonwebtoken';
 
 export const registerVisitor = async (req: Request, res: Response) => {
   try {
+    console.log(`📝 Registering new visitor: ${req.body.name} (${req.body.phone})`);
     const validatedData = VisitorRegistrationSchema.parse(req.body);
     
     // Check Blacklist
@@ -18,6 +19,7 @@ export const registerVisitor = async (req: Request, res: Response) => {
     });
 
     if (isBlacklisted) {
+      console.warn(`🚫 Blacklisted visitor attempted registration: ${validatedData.name}`);
       return res.status(403).json({ error: 'Access Denied: Your details are blacklisted.' });
     }
 
@@ -37,6 +39,7 @@ export const registerVisitor = async (req: Request, res: Response) => {
     });
 
     await visitor.save();
+    console.log(`✅ Visitor registered successfully: ${visitor_code}`);
 
     await new Log({
       visitor_id: visitor._id,
@@ -46,6 +49,7 @@ export const registerVisitor = async (req: Request, res: Response) => {
 
     res.status(201).json({ message: 'Visitor registered successfully', visitorId: visitor._id, visitor_code });
   } catch (error: any) {
+    console.error(`❌ Registration Error: ${error.message}`);
     res.status(400).json({ error: error.errors || error.message });
   }
 };
@@ -107,7 +111,7 @@ export const approveVisitor = async (req: Request, res: Response) => {
     if (status === 'APPROVED') {
       qrCode = jwt.sign(
         { visitorId: visitor._id, exp: Math.floor(visitor.validity.to.getTime() / 1000) },
-        process.env.JWT_SECRET || 'vms_secret'
+        process.env.JWT_SECRET as string
       );
     }
 
@@ -119,7 +123,8 @@ export const approveVisitor = async (req: Request, res: Response) => {
 
 export const getVisitorProfile = async (req: Request, res: Response) => {
   try {
-    const { name, phone } = req.query;
+    const name = req.query.name as string;
+    const phone = req.query.phone as string;
     if (!name || !phone) return res.status(400).json({ error: 'Name and Phone required' });
 
     // Find the most recent record for this visitor
@@ -156,7 +161,7 @@ export const getVisitorByCode = async (req: Request, res: Response) => {
     if (!['PENDING', 'REJECTED'].includes(visitor.status)) {
       token = jwt.sign(
         { visitorId: visitor._id, exp: Math.floor(visitor.validity.to.getTime() / 1000) },
-        process.env.JWT_SECRET || 'vms_secret'
+        process.env.JWT_SECRET as string
       );
     }
 

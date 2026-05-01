@@ -11,6 +11,7 @@ const visitor_schema_1 = require("../validation/visitor.schema");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const registerVisitor = async (req, res) => {
     try {
+        console.log(`📝 Registering new visitor: ${req.body.name} (${req.body.phone})`);
         const validatedData = visitor_schema_1.VisitorRegistrationSchema.parse(req.body);
         // Check Blacklist
         const isBlacklisted = await Blacklist_1.default.findOne({
@@ -20,6 +21,7 @@ const registerVisitor = async (req, res) => {
             ]
         });
         if (isBlacklisted) {
+            console.warn(`🚫 Blacklisted visitor attempted registration: ${validatedData.name}`);
             return res.status(403).json({ error: 'Access Denied: Your details are blacklisted.' });
         }
         // Generate unique visitor code: VMS-YYYYMMDD-XXXX
@@ -36,6 +38,7 @@ const registerVisitor = async (req, res) => {
             status: 'PENDING'
         });
         await visitor.save();
+        console.log(`✅ Visitor registered successfully: ${visitor_code}`);
         await new Log_1.default({
             visitor_id: visitor._id,
             event: 'REGISTERED',
@@ -44,6 +47,7 @@ const registerVisitor = async (req, res) => {
         res.status(201).json({ message: 'Visitor registered successfully', visitorId: visitor._id, visitor_code });
     }
     catch (error) {
+        console.error(`❌ Registration Error: ${error.message}`);
         res.status(400).json({ error: error.errors || error.message });
     }
 };
@@ -97,7 +101,7 @@ const approveVisitor = async (req, res) => {
         }).save();
         let qrCode = null;
         if (status === 'APPROVED') {
-            qrCode = jsonwebtoken_1.default.sign({ visitorId: visitor._id, exp: Math.floor(visitor.validity.to.getTime() / 1000) }, process.env.JWT_SECRET || 'vms_secret');
+            qrCode = jsonwebtoken_1.default.sign({ visitorId: visitor._id, exp: Math.floor(visitor.validity.to.getTime() / 1000) }, process.env.JWT_SECRET);
         }
         res.json({ message: `Visitor ${status.toLowerCase()} successfully`, visitor, qrCode });
     }
@@ -108,7 +112,8 @@ const approveVisitor = async (req, res) => {
 exports.approveVisitor = approveVisitor;
 const getVisitorProfile = async (req, res) => {
     try {
-        const { name, phone } = req.query;
+        const name = req.query.name;
+        const phone = req.query.phone;
         if (!name || !phone)
             return res.status(400).json({ error: 'Name and Phone required' });
         // Find the most recent record for this visitor
@@ -142,7 +147,7 @@ const getVisitorByCode = async (req, res) => {
         let token = null;
         // Allow token retrieval if visitor is approved or already inside
         if (!['PENDING', 'REJECTED'].includes(visitor.status)) {
-            token = jsonwebtoken_1.default.sign({ visitorId: visitor._id, exp: Math.floor(visitor.validity.to.getTime() / 1000) }, process.env.JWT_SECRET || 'vms_secret');
+            token = jsonwebtoken_1.default.sign({ visitorId: visitor._id, exp: Math.floor(visitor.validity.to.getTime() / 1000) }, process.env.JWT_SECRET);
         }
         res.json({ visitor, token });
     }

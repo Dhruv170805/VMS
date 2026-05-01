@@ -20,9 +20,9 @@ router.post('/auth/register', auth_controller_1.register); // Helper
 // Visitor Routes
 router.post('/visitor/register', visitor_controller_1.registerVisitor);
 router.get('/visitor/pending', visitor_controller_1.getPendingVisitors);
-router.get('/visitor/host/:hostId', getHostVisitors);
-router.get('/visitor/profile', getVisitorProfile);
-router.get('/visitor/track/:code', getVisitorByCode);
+router.get('/visitor/host/:hostId', visitor_controller_1.getHostVisitors);
+router.get('/visitor/profile', visitor_controller_1.getVisitorProfile);
+router.get('/visitor/track/:code', visitor_controller_1.getVisitorByCode);
 router.post('/visitor/:id/approve', visitor_controller_1.approveVisitor);
 router.patch('/visitor/:id/status', visitor_controller_1.updateVisitorStatus);
 router.get('/visitor/active', dashboard_controller_1.getDetailedStats);

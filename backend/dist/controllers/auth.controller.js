@@ -13,7 +13,7 @@ const login = async (req, res) => {
         if (!user || !(await user.comparePassword(password))) {
             return res.status(401).json({ error: 'Invalid email or password' });
         }
-        const token = jsonwebtoken_1.default.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET || 'vms_secret', { expiresIn: '1d' });
+        const token = jsonwebtoken_1.default.sign({ userId: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1d' });
         res.json({ token, role: user.role, name: user.name, userId: user._id });
     }
     catch (error) {

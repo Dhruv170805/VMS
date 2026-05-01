@@ -9,7 +9,7 @@ export const checkIn = async (req: Request, res: Response) => {
     let visitor;
 
     if (token) {
-      const decoded: any = jwt.verify(token, process.env.JWT_SECRET || 'vms_secret');
+      const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
       visitor = await Visitor.findById(decoded.visitorId);
     } else if (visitorCode) {
       visitor = await Visitor.findOne({ visitor_code: visitorCode });
@@ -40,7 +40,7 @@ export const checkOut = async (req: Request, res: Response) => {
     let visitor;
 
     if (token) {
-      const decoded: any = jwt.verify(token, process.env.JWT_SECRET || 'vms_secret');
+      const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
       visitor = await Visitor.findById(decoded.visitorId);
     } else if (visitorCode) {
       visitor = await Visitor.findOne({ visitor_code: visitorCode });
