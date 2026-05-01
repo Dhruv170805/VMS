@@ -559,7 +559,7 @@ function AdminPanel() {
 
   const updateStatus = async (id, status) => {
     haptic('light');
-    const res = await fetch(`${API_BASE}/visitor/${id}/status`, {
+    const res = await fetchAuth(`${API_BASE}/visitor/${id}/status`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status })
@@ -849,7 +849,7 @@ function GuardPanel() {
 
 function Dashboard() {
   const [stats, setStats] = useState(null);
-  useEffect(() => { fetch(`${API_BASE}/dashboard/stats`).then(r => r.json()).then(setStats); }, []);
+  useEffect(() => { fetchAuth(`${API_BASE}/dashboard/stats`).then(r => r.json()).then(setStats); }, []);
   if (!stats) return null;
 
   const data = [
@@ -1019,7 +1019,7 @@ function HostDashboard() {
 
   const handleAction = async (id, status) => {
     haptic('light');
-    const res = await fetch(`${API_BASE}/visitor/${id}/approve`, {
+    const res = await fetchAuth(`${API_BASE}/visitor/${id}/approve`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status })
@@ -1030,7 +1030,7 @@ function HostDashboard() {
 
   const updateStatus = async (id, status) => {
     haptic('light');
-    const res = await fetch(`${API_BASE}/visitor/${id}/status`, {
+    const res = await fetchAuth(`${API_BASE}/visitor/${id}/status`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status })
