@@ -1,0 +1,176 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.updateVisitorStatus = exports.getVisitorByCode = exports.getVisitorProfile = exports.approveVisitor = exports.getPendingVisitors = exports.getHostVisitors = exports.registerVisitor = void 0;
+const Visitor_1 = __importDefault(require("../models/Visitor"));
+const Log_1 = __importDefault(require("../models/Log"));
+const Blacklist_1 = __importDefault(require("../models/Blacklist"));
+const visitor_schema_1 = require("../validation/visitor.schema");
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const registerVisitor = async (req, res) => {
+    try {
+        const validatedData = visitor_schema_1.VisitorRegistrationSchema.parse(req.body);
+        // Check Blacklist
+        const isBlacklisted = await Blacklist_1.default.findOne({
+            $or: [
+                { value: validatedData.email, type: 'EMAIL' },
+                { value: validatedData.phone, type: 'PHONE' }
+            ]
+        });
+        if (isBlacklisted) {
+            return res.status(403).json({ error: 'Access Denied: Your details are blacklisted.' });
+        }
+        // Generate unique visitor code: VMS-YYYYMMDD-XXXX
+        const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+        const randomStr = Math.random().toString(36).substring(2, 6).toUpperCase();
+        const visitor_code = `VMS-${dateStr}-${randomStr}`;
+        const visitor = new Visitor_1.default({
+            ...validatedData,
+            visitor_code,
+            validity: {
+                from: new Date(validatedData.validity.from),
+                to: new Date(validatedData.validity.to)
+            },
+            status: 'PENDING'
+        });
+        await visitor.save();
+        await new Log_1.default({
+            visitor_id: visitor._id,
+            event: 'REGISTERED',
+            actor: 'SYSTEM'
+        }).save();
+        res.status(201).json({ message: 'Visitor registered successfully', visitorId: visitor._id, visitor_code });
+    }
+    catch (error) {
+        res.status(400).json({ error: error.errors || error.message });
+    }
+};
+exports.registerVisitor = registerVisitor;
+const getHostVisitors = async (req, res) => {
+    try {
+        const { hostId } = req.params;
+        const { status } = req.query;
+        const filter = { host_id: hostId };
+        if (status) {
+            filter.status = status;
+        }
+        const visitors = await Visitor_1.default.find(filter)
+            .populate('host_id')
+            .sort({ created_at: -1 });
+        res.json(visitors);
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+exports.getHostVisitors = getHostVisitors;
+const getPendingVisitors = async (req, res) => {
+    try {
+        const visitors = await Visitor_1.default.find({ status: 'PENDING' })
+            .populate('host_id')
+            .sort({ created_at: -1 });
+        res.json(visitors);
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+exports.getPendingVisitors = getPendingVisitors;
+const approveVisitor = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = visitor_schema_1.VisitorApprovalSchema.parse(req.body);
+        const updateData = { status };
+        if (status === 'APPROVED') {
+            updateData['timestamps.approved_at'] = new Date();
+        }
+        const visitor = await Visitor_1.default.findByIdAndUpdate(id, updateData, { new: true }).populate('host_id');
+        if (!visitor) {
+            return res.status(404).json({ error: 'Visitor not found' });
+        }
+        await new Log_1.default({
+            visitor_id: visitor._id,
+            event: status,
+            actor: 'HOST'
+        }).save();
+        let qrCode = null;
+        if (status === 'APPROVED') {
+            qrCode = jsonwebtoken_1.default.sign({ visitorId: visitor._id, exp: Math.floor(visitor.validity.to.getTime() / 1000) }, process.env.JWT_SECRET || 'vms_secret');
+        }
+        res.json({ message: `Visitor ${status.toLowerCase()} successfully`, visitor, qrCode });
+    }
+    catch (error) {
+        res.status(400).json({ error: error.errors || error.message });
+    }
+};
+exports.approveVisitor = approveVisitor;
+const getVisitorProfile = async (req, res) => {
+    try {
+        const { name, phone } = req.query;
+        if (!name || !phone)
+            return res.status(400).json({ error: 'Name and Phone required' });
+        // Find the most recent record for this visitor
+        const visitor = await Visitor_1.default.findOne({ name, phone })
+            .sort({ created_at: -1 });
+        if (!visitor)
+            return res.json(null);
+        // Return the reusable identity fields
+        res.json({
+            name: visitor.name,
+            phone: visitor.phone,
+            email: visitor.email,
+            company: visitor.company,
+            photo_base64: visitor.photo_base64,
+            id_photo_base64: visitor.id_photo_base64,
+            id_type: visitor.id_type,
+            id_number: visitor.id_number
+        });
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+exports.getVisitorProfile = getVisitorProfile;
+const getVisitorByCode = async (req, res) => {
+    try {
+        const { code } = req.params;
+        const visitor = await Visitor_1.default.findOne({ visitor_code: code }).populate('host_id');
+        if (!visitor)
+            return res.status(404).json({ error: 'Visitor not found' });
+        let token = null;
+        // Allow token retrieval if visitor is approved or already inside
+        if (!['PENDING', 'REJECTED'].includes(visitor.status)) {
+            token = jsonwebtoken_1.default.sign({ visitorId: visitor._id, exp: Math.floor(visitor.validity.to.getTime() / 1000) }, process.env.JWT_SECRET || 'vms_secret');
+        }
+        res.json({ visitor, token });
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+exports.getVisitorByCode = getVisitorByCode;
+const updateVisitorStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body; // e.g., MEET_IN, MEET_OVER
+        const timestampField = status.toLowerCase() + '_at';
+        const updateData = { status };
+        updateData[`timestamps.${timestampField}`] = new Date();
+        const visitor = await Visitor_1.default.findByIdAndUpdate(id, updateData, { new: true });
+        if (!visitor)
+            return res.status(404).json({ error: 'Visitor not found' });
+        await new Log_1.default({
+            visitor_id: visitor._id,
+            event: status,
+            actor: 'HOST'
+        }).save();
+        res.json({ message: `Status updated to ${status}`, visitor });
+    }
+    catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+exports.updateVisitorStatus = updateVisitorStatus;
+//# sourceMappingURL=visitor.controller.js.map
