@@ -66,7 +66,12 @@ export default function Home() {
       localStorage.setItem('userId', data.userId);
       if (data.employeeId) localStorage.setItem('employeeId', data.employeeId);
       router.push(data.role === 'ADMIN' ? '/admin' : data.role === 'GUARD' ? '/guard' : '/host');
-    } catch (err) { setError(err.message); }
+    } catch (err) { 
+      setError(err.message === 'Invalid email or password' 
+        ? "Invalid credentials. Have you run the database setup?" 
+        : `Connection Error: ${err.message}`
+      ); 
+    }
   };
 
   if (visitorPass) return <DigitalPass pass={visitorPass} onBack={() => { haptic('light'); setVisitorPass(null); }} />;
