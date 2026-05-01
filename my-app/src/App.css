@@ -161,6 +161,37 @@ body::after {
 
 .wide-glass { max-width: 1100px; }
 
+.glass-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.back-btn-glass {
+  text-decoration: none;
+  color: var(--apple-blue);
+  font-weight: 600;
+  font-size: 1rem;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.back-btn-glass:hover {
+  transform: translateX(-4px);
+  opacity: 0.8;
+}
+
+.form-actions-glass {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  width: 100%;
+}
+
 /* THE HERO */
 .home-hero { text-align: center; margin-bottom: 0.5rem; }
 

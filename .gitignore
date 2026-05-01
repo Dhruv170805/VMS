@@ -1,0 +1,10 @@
+node_modules/
+.env
+dist/
+.DS_Store
+backend/node_modules/
+backend/dist/
+backend/.env
+my-app/node_modules/
+my-app/dist/
+my-app/.env

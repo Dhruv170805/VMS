@@ -339,8 +339,9 @@ function VisitorForm() {
     <div className="visitor-layout fade-in">
       <GlassCard className="wide-glass main-glass">
         <div className="glass-header">
+          <Link to="/" className="back-btn-glass">← Back</Link>
           <h2>Registration</h2>
-          <Link to="/" className="close-btn-glass">×</Link>
+          <div style={{ width: '60px' }}></div> {/* Spacer for balance */}
         </div>
 
         {step === 1 ? (
@@ -353,9 +354,12 @@ function VisitorForm() {
               <input type="text" placeholder="Phone Number" required value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} />
             </div>
             {error && <p className="error-text">{error}</p>}
-            <button onClick={checkIdentity} disabled={loading} className="apple-btn-primary full-width margin-top">
-              {loading ? 'Processing...' : 'Continue'}
-            </button>
+            <div className="form-actions-glass">
+              <Link to="/" className="apple-btn-secondary">Back</Link>
+              <button onClick={checkIdentity} disabled={loading} className="apple-btn-primary flex-1">
+                {loading ? 'Processing...' : 'Continue'}
+              </button>
+            </div>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="advanced-form-glass">
