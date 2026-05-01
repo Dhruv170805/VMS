@@ -6,8 +6,10 @@ import GlassCard from '@/components/GlassCard';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { haptic, usePullToRefresh } from '@/utils/hooks';
 import { API_BASE, fetchAuth } from '@/utils/config';
+import { useConfig } from '@/context/ConfigContext';
 
 function GuardPanelContent() {
+  const { config: sysConfig } = useConfig();
   const [input, setInput] = useState('');
   const [msg, setMsg] = useState(null);
   const [stats, setStats] = useState(null);
@@ -16,7 +18,7 @@ function GuardPanelContent() {
   const fetchStats = async () => {
     try {
       const res = await fetchAuth(`${API_BASE}/dashboard/stats`);
-      setStats(await res.json());
+      if (res.ok) setStats(await res.json());
     } catch (err) { console.error(err); }
   };
 
@@ -30,7 +32,7 @@ function GuardPanelContent() {
 
   const handleGate = async (action) => {
     haptic('light');
-    const payload = input.startsWith('VMS-') ? { visitorCode: input } : { token: input };
+    const payload = input.startsWith('VMS-') || input.includes('-') ? { visitorCode: input } : { token: input };
     const res = await fetchAuth(`${API_BASE}/gate/${action}`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
@@ -54,7 +56,7 @@ function GuardPanelContent() {
   return (
     <div className="guard-layout">
       <nav className="guard-side-nav">
-        <h1 className="nav-logo">GUARD</h1>
+        <h1 className="nav-logo">{sysConfig.appName}</h1>
         <div className="nav-group">
           <button className="active">Access Control</button>
         </div>
@@ -91,8 +93,8 @@ function GuardPanelContent() {
               style={{ fontSize: '1.5rem', textAlign: 'center', padding: '1.5rem' }}
             />
             <div className="form-actions-glass">
-              <button onClick={() => handleGate('checkin')} className="apple-btn-success flex-1">MARK ENTRY</button>
-              <button onClick={() => handleGate('checkout')} className="apple-btn-danger flex-1">MARK EXIT</button>
+              <button onClick={() => handleGate('checkin')} className="apple-btn-primary flex-1">MARK ENTRY</button>
+              <button onClick={() => handleGate('checkout')} className="apple-btn-secondary flex-1">MARK EXIT</button>
             </div>
           </div>
           {msg && <div className={`apple-alert-${msg.type}`} style={{ marginTop: '1.5rem', padding: '1rem', borderRadius: '12px', textAlign: 'center', background: msg.type === 'success' ? 'rgba(52, 199, 89, 0.1)' : 'rgba(255, 59, 48, 0.1)', color: msg.type === 'success' ? '#248a3d' : '#ff3b30' }}>{msg.text}</div>}

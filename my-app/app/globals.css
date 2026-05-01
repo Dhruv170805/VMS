@@ -172,7 +172,7 @@ body {
   max-width: 1100px;
 }
 
-/* ADMIN & DASHBOARD LAYOUT */
+/* ADMIN, HOST, & GUARD SHARED LAYOUT SYSTEM */
 .admin-layout,
 .host-layout,
 .guard-layout {
@@ -183,6 +183,7 @@ body {
   gap: 24px;
   padding: 24px;
   overflow: hidden;
+  background: transparent;
 }
 
 .admin-side-nav,
@@ -190,12 +191,16 @@ body {
 .guard-side-nav {
   background: rgba(255, 255, 255, 0.4);
   backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
   border-radius: var(--radius);
   border: 1px solid var(--glass-border);
   padding: 2.5rem;
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
+  position: relative;
+  z-index: 10;
 }
 
 .admin-main,
@@ -206,97 +211,139 @@ body {
   gap: 24px;
   overflow-y: auto;
   padding-right: 8px;
+  animation: slideInUp 0.6s var(--ease-liquid);
 }
 
-/* APPLE BUTTONS */
-.apple-btn-primary {
+/* SIDEBAR NAVIGATION REFINEMENT */
+.nav-logo {
+  font-size: 2.2rem;
+  font-weight: 900;
+  letter-spacing: -2px;
+  margin-bottom: 3rem;
+  background: linear-gradient(180deg, var(--apple-text), #555);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-align: center;
+}
+
+.nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  flex: 1;
+}
+
+.nav-group button {
+  background: transparent;
+  border: none;
+  padding: 14px 20px;
+  border-radius: 16px;
+  text-align: left;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--apple-text);
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-group button:hover {
+  background: rgba(0, 0, 0, 0.04);
+  transform: translateX(4px);
+}
+
+.nav-group button.active {
+  background: white;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  color: var(--apple-blue);
+  transform: translateX(8px);
+}
+
+.nav-group button::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 0;
   background: var(--apple-blue);
+  border-radius: 0 4px 4px 0;
+  transition: var(--transition);
+}
+
+.nav-group button.active::after {
+  height: 50%;
+}
+
+/* APPLE ACTION BUTTONS */
+.apple-btn-success {
+  background: #34c759;
   color: white;
   border: none;
   padding: 14px 28px;
   border-radius: 18px;
   font-weight: 700;
-  font-size: 1rem;
   cursor: pointer;
-  transition: all 0.3s var(--ease-liquid);
-  box-shadow: 0 8px 24px rgba(var(--apple-blue-rgb), 0.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
+  transition: var(--transition);
+  box-shadow: 0 8px 24px rgba(52, 199, 89, 0.2);
 }
 
-.apple-btn-primary:hover {
+.apple-btn-success:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 32px rgba(var(--apple-blue-rgb), 0.35);
-  background: #0077ed;
+  box-shadow: 0 12px 32px rgba(52, 199, 89, 0.3);
 }
 
-.apple-btn-primary:active {
-  transform: scale(0.97);
-}
-
-.apple-btn-secondary {
-  background: rgba(0, 0, 0, 0.05);
-  color: var(--apple-text);
-  border: 1px solid rgba(0, 0, 0, 0.1);
+.apple-btn-danger {
+  background: #ff3b30;
+  color: white;
+  border: none;
   padding: 14px 28px;
   border-radius: 18px;
   font-weight: 700;
-  transition: all 0.3s var(--ease-liquid);
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: 0 8px 24px rgba(255, 59, 48, 0.2);
 }
 
-.apple-btn-secondary:hover {
-  background: rgba(0, 0, 0, 0.08);
+.apple-btn-danger:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(255, 59, 48, 0.3);
 }
 
-/* DIGITAL PASS - GOD LEVEL */
-.vms-card-studio {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(40px) saturate(180%);
-  border-radius: 40px;
-  padding: 3rem;
-  width: 100%;
-  max-width: 480px;
-  border: 1px solid rgba(255, 255, 255, 0.8);
-  box-shadow:
-    0 40px 100px rgba(0, 0, 0, 0.1),
-    inset 0 1px 1px white;
-  position: relative;
-  overflow: hidden;
-}
-
-.vms-card-studio::before {
-  content: "";
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(45deg,
-      transparent 45%,
-      rgba(255, 255, 255, 0.4) 50%,
-      transparent 55%);
-  transform: rotate(-45deg);
-  animation: hologram 6s linear infinite;
-  pointer-events: none;
-}
-
-@keyframes hologram {
-  from {
-    transform: translateX(-100%) rotate(-45deg);
-  }
-
-  to {
-    transform: translateX(100%) rotate(-45deg);
-  }
-}
-
-.card-top {
-  display: flex;
-  justify-content: space-between;
+/* MEETING TIMER STYLING */
+.meeting-timer {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--apple-blue);
+  background: rgba(var(--apple-blue-rgb), 0.1);
+  padding: 6px 12px;
+  border-radius: 999px;
+  display: inline-flex;
   align-items: center;
-  margin-bottom: 2.5rem;
+  gap: 6px;
+  margin-top: 8px;
+  border: 1px solid rgba(var(--apple-blue-rgb), 0.1);
+}
+
+/* USER WELCOME CARD */
+.user-welcome {
+  background: rgba(0, 0, 0, 0.03);
+  padding: 1.5rem;
+  border-radius: 24px;
+  margin-bottom: 2rem;
+  border: 1px solid rgba(0, 0, 0, 0.03);
+}
+
+.user-welcome h2 {
+  margin: 4px 0 0 0;
+  font-size: 1.6rem;
+  font-weight: 900;
+  letter-spacing: -1px;
 }
 
 .logo-studio {

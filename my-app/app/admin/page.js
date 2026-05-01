@@ -41,32 +41,32 @@ function AdminPanelContent() {
 
   const fetchData = async () => {
     try {
-      const vRes = await fetchAuth(`${API_BASE}/visitor/pending`);
+      // Parallel fetch to prevent UI blocking
+      const [vRes, eRes, logRes, statsRes, blRes] = await Promise.all([
+        fetchAuth(`${API_BASE}/visitor/pending`),
+        fetchAuth(`${API_BASE}/employees`),
+        fetchAuth(`${API_BASE}/logs`),
+        fetchAuth(`${API_BASE}/dashboard/stats/detailed`),
+        fetchAuth(`${API_BASE}/blacklist`)
+      ]);
+
       if (vRes.ok) setPending(await vRes.json());
-
-      const eRes = await fetchAuth(`${API_BASE}/employees`);
       if (eRes.ok) setEmployees(await eRes.json());
-
-      const logRes = await fetchAuth(`${API_BASE}/logs`);
       if (logRes.ok) setLogs(await logRes.json());
-
-      const statsRes = await fetchAuth(`${API_BASE}/dashboard/stats/detailed`);
       if (statsRes.ok) {
         const allToday = await statsRes.json();
         setAllHistory(allToday);
         setActiveVisits(allToday.filter(v => ['GATE_IN', 'MEET_IN', 'MEET_OVER', 'APPROVED'].includes(v.status)));
       }
-
-      const blRes = await fetchAuth(`${API_BASE}/blacklist`);
       if (blRes.ok) setBlacklist(await blRes.json());
-    } catch (err) {
-      console.error("Admin Fetch Error:", err);
+    } catch (err) { 
+      console.error("Admin Fetch Error:", err); 
     }
   };
 
   usePullToRefresh(fetchData);
 
-  useEffect(() => {
+  useEffect(() => { 
     fetchData();
     const interval = setInterval(fetchData, 10000);
     return () => clearInterval(interval);
@@ -108,6 +108,13 @@ function AdminPanelContent() {
     router.push('/login');
   };
 
+  const EmptyState = ({ icon, title }) => (
+    <div style={{ textAlign: 'center', padding: '5rem 2rem' }}>
+      <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>{icon}</div>
+      <p className="text-secondary" style={{ fontWeight: 600 }}>{title}</p>
+    </div>
+  );
+
   return (
     <div className="admin-layout">
       <nav className="admin-side-nav">
@@ -136,22 +143,22 @@ function AdminPanelContent() {
                 <h4>Branding</h4>
                 <div className="apple-input-group-vertical">
                   <label>App Name</label>
-                  <input type="text" value={settings.appName || ''} onChange={e => setSettings({ ...settings, appName: e.target.value })} />
+                  <input type="text" value={settings.appName || ''} onChange={e => setSettings({...settings, appName: e.target.value})} />
                   <label>Subtitle</label>
-                  <input type="text" value={settings.appSubtitle || ''} onChange={e => setSettings({ ...settings, appSubtitle: e.target.value })} />
+                  <input type="text" value={settings.appSubtitle || ''} onChange={e => setSettings({...settings, appSubtitle: e.target.value})} />
                   <label>Company Name</label>
-                  <input type="text" value={settings.companyName || ''} onChange={e => setSettings({ ...settings, companyName: e.target.value })} />
+                  <input type="text" value={settings.companyName || ''} onChange={e => setSettings({...settings, companyName: e.target.value})} />
                 </div>
               </div>
               <div className="form-section-glass">
                 <h4>System Logic</h4>
                 <div className="apple-input-group-vertical">
                   <label>Visitor Code Prefix</label>
-                  <input type="text" value={settings.visitorCodePrefix || ''} onChange={e => setSettings({ ...settings, visitorCodePrefix: e.target.value })} />
+                  <input type="text" value={settings.visitorCodePrefix || ''} onChange={e => setSettings({...settings, visitorCodePrefix: e.target.value})} />
                   <label>Contact Email</label>
-                  <input type="email" value={settings.contactEmail || ''} onChange={e => setSettings({ ...settings, contactEmail: e.target.value })} />
+                  <input type="email" value={settings.contactEmail || ''} onChange={e => setSettings({...settings, contactEmail: e.target.value})} />
                   <label style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '10px' }}>
-                    <input type="checkbox" checked={settings.allowPublicRegistration ?? true} onChange={e => setSettings({ ...settings, allowPublicRegistration: e.target.checked })} style={{ width: 'auto' }} />
+                    <input type="checkbox" checked={settings.allowPublicRegistration ?? true} onChange={e => setSettings({...settings, allowPublicRegistration: e.target.checked})} style={{ width: 'auto' }} />
                     Allow Public Registration
                   </label>
                 </div>
@@ -165,30 +172,31 @@ function AdminPanelContent() {
           <GlassCard className="main-glass">
             <h3 className="card-title">Access Requests</h3>
             <div className="apple-table-container">
-              <table className="apple-table">
-                <thead><tr><th>Visitor</th><th>Details</th><th>Host</th><th>Actions</th></tr></thead>
-                <tbody>
-                  {Array.isArray(pending) && pending.map(v => (
-                    <tr key={v._id}>
-                      <td>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                          <img src={v.photo_base64} className="list-avatar" />
-                          <div><strong>{v.name}</strong><small className="text-secondary">{v.company}</small></div>
-                        </div>
-                      </td>
-                      <td>{v.purpose}</td>
-                      <td>{v.host_id?.name}</td>
-                      <td>
-                        <div className="action-btns" style={{ display: 'flex', gap: '8px' }}>
-                          <button className="apple-btn-sm" style={{ background: '#34c759', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '8px', fontWeight: 700 }} onClick={() => updateStatus(v._id, 'APPROVED')}>Approve</button>
-                          <button className="apple-btn-sm" style={{ background: '#ff3b30', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '8px', fontWeight: 700 }} onClick={() => updateStatus(v._id, 'REJECTED')}>Reject</button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {(!pending || pending.length === 0) && <p className="text-secondary" style={{ textAlign: 'center', padding: '3rem' }}>No pending requests.</p>}
+              {(!pending || pending.length === 0) ? <EmptyState icon="📥" title="No pending requests" /> : (
+                <table className="apple-table">
+                  <thead><tr><th>Visitor</th><th>Details</th><th>Host</th><th>Actions</th></tr></thead>
+                  <tbody>
+                    {pending.map(v => (
+                      <tr key={v._id}>
+                        <td>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <img src={v.photo_base64} className="list-avatar" alt="" />
+                            <div><strong>{v.name}</strong><small className="text-secondary">{v.company}</small></div>
+                          </div>
+                        </td>
+                        <td>{v.purpose}</td>
+                        <td>{v.host_id?.name}</td>
+                        <td>
+                          <div className="action-btns" style={{ display: 'flex', gap: '8px' }}>
+                            <button className="apple-btn-sm" style={{ background: '#34c759', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '8px', fontWeight: 700 }} onClick={() => updateStatus(v._id, 'APPROVED')}>Approve</button>
+                            <button className="apple-btn-sm" style={{ background: '#ff3b30', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '8px', fontWeight: 700 }} onClick={() => updateStatus(v._id, 'REJECTED')}>Reject</button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </GlassCard>
         )}
@@ -197,33 +205,34 @@ function AdminPanelContent() {
           <GlassCard className="main-glass">
             <h3 className="card-title">Live Premises Tracking</h3>
             <div className="apple-table-container">
-              <table className="apple-table">
-                <thead><tr><th>Visitor</th><th>Code</th><th>Status</th><th>Override</th></tr></thead>
-                <tbody>
-                  {Array.isArray(activeVisits) && activeVisits.map(v => (
-                    <tr key={v._id}>
-                      <td><strong>{v.name}</strong></td>
-                      <td><code>{v.visitor_code}</code></td>
-                      <td><span className={`status-badge-glass ${v.status}`}>{v.status}</span></td>
-                      <td>
-                        <select
-                          className="apple-select"
-                          style={{ background: 'rgba(0,0,0,0.05)', border: 'none', padding: '6px 12px', borderRadius: '8px', fontWeight: 600 }}
-                          value={v.status}
-                          onChange={(e) => updateStatus(v._id, e.target.value)}
-                        >
-                          <option value="APPROVED">Approved</option>
-                          <option value="GATE_IN">Gate In</option>
-                          <option value="MEET_IN">Meet In</option>
-                          <option value="MEET_OVER">Meet Over</option>
-                          <option value="GATE_OUT">Gate Out</option>
-                        </select>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {(!activeVisits || activeVisits.length === 0) && <p className="text-secondary" style={{ textAlign: 'center', padding: '3rem' }}>No visitors currently on site.</p>}
+              {(!activeVisits || activeVisits.length === 0) ? <EmptyState icon="👥" title="No visitors currently on site" /> : (
+                <table className="apple-table">
+                  <thead><tr><th>Visitor</th><th>Code</th><th>Status</th><th>Override</th></tr></thead>
+                  <tbody>
+                    {activeVisits.map(v => (
+                      <tr key={v._id}>
+                        <td><strong>{v.name}</strong></td>
+                        <td><code>{v.visitor_code}</code></td>
+                        <td><span className={`status-badge-glass ${v.status}`}>{v.status}</span></td>
+                        <td>
+                          <select 
+                            className="apple-select" 
+                            style={{ background: 'rgba(0,0,0,0.05)', border: 'none', padding: '6px 12px', borderRadius: '8px', fontWeight: 600 }}
+                            value={v.status} 
+                            onChange={(e) => updateStatus(v._id, e.target.value)}
+                          >
+                            <option value="APPROVED">Approved</option>
+                            <option value="GATE_IN">Gate In</option>
+                            <option value="MEET_IN">Meet In</option>
+                            <option value="MEET_OVER">Meet Over</option>
+                            <option value="GATE_OUT">Gate Out</option>
+                          </select>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </GlassCard>
         )}
@@ -232,23 +241,24 @@ function AdminPanelContent() {
           <GlassCard className="main-glass">
             <h3 className="card-title">Global History</h3>
             <div className="apple-table-container">
-              <table className="apple-table">
-                <thead><tr><th>Time</th><th>Visitor</th><th>Host</th><th>Status</th></tr></thead>
-                <tbody>
-                  {Array.isArray(allHistory) && allHistory.map(v => (
-                    <tr key={v._id}>
-                      <td>{new Date(v.created_at).toLocaleTimeString()}</td>
-                      <td>
-                        <strong>{v.name}</strong>
-                        <div className="text-secondary" style={{ fontSize: '0.8rem' }}>{v.phone}</div>
-                      </td>
-                      <td>{v.host_id?.name}</td>
-                      <td><span className={`status-badge-glass ${v.status}`}>{v.status}</span></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {(!allHistory || allHistory.length === 0) && <p className="text-secondary" style={{ textAlign: 'center', padding: '3rem' }}>No historical records found.</p>}
+              {(!allHistory || allHistory.length === 0) ? <EmptyState icon="📜" title="No historical records found" /> : (
+                <table className="apple-table">
+                  <thead><tr><th>Time</th><th>Visitor</th><th>Host</th><th>Status</th></tr></thead>
+                  <tbody>
+                    {allHistory.map(v => (
+                      <tr key={v._id}>
+                        <td>{new Date(v.created_at).toLocaleTimeString()}</td>
+                        <td>
+                          <strong>{v.name}</strong>
+                          <div className="text-secondary" style={{ fontSize: '0.8rem' }}>{v.phone}</div>
+                        </td>
+                        <td>{v.host_id?.name}</td>
+                        <td><span className={`status-badge-glass ${v.status}`}>{v.status}</span></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </GlassCard>
         )}
@@ -269,20 +279,21 @@ function AdminPanelContent() {
             <GlassCard className="main-glass">
               <h3>Current Directory</h3>
               <div className="apple-table-container">
-                <table className="apple-table">
-                  <thead><tr><th>Name</th><th>Department</th><th>Visibility</th><th>Action</th></tr></thead>
-                  <tbody>
-                    {Array.isArray(employees) && employees.map(e => (
-                      <tr key={e._id}>
-                        <td><strong>{e.name}</strong></td>
-                        <td>{e.department}</td>
-                        <td><span className={`apple-badge ${e.isActive ? 'success' : 'secondary'}`}>{e.isActive ? 'Active' : 'Hidden'}</span></td>
-                        <td><button className="apple-btn-sm" onClick={() => toggleEmployee(e._id)}>{e.isActive ? 'Hide' : 'Show'}</button></td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {(!employees || employees.length === 0) && <p className="text-secondary" style={{ textAlign: 'center', padding: '3rem' }}>No staff members found.</p>}
+                {(!employees || employees.length === 0) ? <EmptyState icon="🏢" title="No staff members found" /> : (
+                  <table className="apple-table">
+                    <thead><tr><th>Name</th><th>Department</th><th>Visibility</th><th>Action</th></tr></thead>
+                    <tbody>
+                      {employees.map(e => (
+                        <tr key={e._id}>
+                          <td><strong>{e.name}</strong></td>
+                          <td>{e.department}</td>
+                          <td><span className={`apple-badge ${e.isActive ? 'success' : 'secondary'}`}>{e.isActive ? 'Active' : 'Hidden'}</span></td>
+                          <td><button className="apple-btn-sm" onClick={() => toggleEmployee(e._id)}>{e.isActive ? 'Hide' : 'Show'}</button></td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                )}
               </div>
             </GlassCard>
           </div>
@@ -292,20 +303,21 @@ function AdminPanelContent() {
           <GlassCard className="main-glass">
             <h3>Banned Individuals</h3>
             <div className="apple-table-container">
-              <table className="apple-table">
-                <thead><tr><th>Identifier</th><th>Type</th><th>Reason</th><th>Status</th></tr></thead>
-                <tbody>
-                  {Array.isArray(blacklist) && blacklist.map(b => (
-                    <tr key={b._id}>
-                      <td>{b.value}</td>
-                      <td>{b.type}</td>
-                      <td>{b.reason}</td>
-                      <td><button className="apple-badge danger" onClick={async () => { await fetchAuth(`${API_BASE}/blacklist/${b._id}`, { method: 'DELETE' }); fetchData(); }}>Unban</button></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {(!blacklist || blacklist.length === 0) && <p className="text-secondary" style={{ textAlign: 'center', padding: '3rem' }}>Blacklist is currently empty.</p>}
+              {(!blacklist || blacklist.length === 0) ? <EmptyState icon="🚫" title="Blacklist is currently empty" /> : (
+                <table className="apple-table">
+                  <thead><tr><th>Identifier</th><th>Type</th><th>Reason</th><th>Status</th></tr></thead>
+                  <tbody>
+                    {blacklist.map(b => (
+                      <tr key={b._id}>
+                        <td>{b.value}</td>
+                        <td>{b.type}</td>
+                        <td>{b.reason}</td>
+                        <td><button className="apple-badge danger" onClick={async () => { await fetchAuth(`${API_BASE}/blacklist/${b._id}`, { method: 'DELETE' }); fetchData(); }}>Unban</button></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </GlassCard>
         )}
@@ -314,20 +326,21 @@ function AdminPanelContent() {
           <GlassCard className="main-glass">
             <h3>System Audit</h3>
             <div className="apple-table-container">
-              <table className="apple-table">
-                <thead><tr><th>Time</th><th>Subject</th><th>Action</th><th>Actor</th></tr></thead>
-                <tbody>
-                  {Array.isArray(logs) && logs.map(l => (
-                    <tr key={l._id}>
-                      <td>{new Date(l.timestamp).toLocaleString()}</td>
-                      <td>{l.visitor_id?.name || 'System'}</td>
-                      <td>{l.event}</td>
-                      <td>{l.actor}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {(!logs || logs.length === 0) && <p className="text-secondary" style={{ textAlign: 'center', padding: '3rem' }}>No audit logs available.</p>}
+              {(!logs || logs.length === 0) ? <EmptyState icon="🛡️" title="No audit logs available" /> : (
+                <table className="apple-table">
+                  <thead><tr><th>Time</th><th>Subject</th><th>Action</th><th>Actor</th></tr></thead>
+                  <tbody>
+                    {logs.map(l => (
+                      <tr key={l._id}>
+                        <td>{new Date(l.timestamp).toLocaleString()}</td>
+                        <td>{l.visitor_id?.name || 'System'}</td>
+                        <td>{l.event}</td>
+                        <td>{l.actor}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </GlassCard>
         )}

@@ -1,5 +1,3 @@
-'use client';
-
 import React, { useState, useEffect } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
 import { motion } from 'framer-motion';
@@ -49,12 +47,12 @@ function DigitalPass({ pass, onBack }) {
           
           <div className="card-main">
             <div className="v-identity">
-              <div className="v-photo-studio"><img src={currentPass.photo_base64} /></div>
+              <div className="v-photo-studio"><img src={currentPass.photo_base64} alt="Visitor" /></div>
               <div className="v-qr-studio">
                 {currentPass.token ? (
                   <QRCodeCanvas value={currentPass.token} size={110} level="H" bgColor="transparent" fgColor="#1d1d1f" />
                 ) : (
-                  <div className="qr-status-text" style={{ fontSize: '0.7rem', fontWeight: 800, color: '#6b7280', textAlign: 'center' }}>
+                  <div className="qr-status-text" style={{ fontSize: '0.7rem', fontWeight: 800, color: '#86868b', textAlign: 'center' }}>
                     {currentPass.status === 'PENDING' ? 'AWAITING APPROVAL' : 'SECURE TOKEN'}
                   </div>
                 )}
@@ -84,7 +82,7 @@ function DigitalPass({ pass, onBack }) {
           </div>
         </div>
 
-        <div className="pass-controls no-print" style={{ display: 'flex', gap: '1rem', marginTop: '2.5rem', width: '100%', maxWidth: '480px' }}>
+        <div className="pass-controls no-print" style={{ display: 'flex', gap: '1rem', marginTop: '2.5rem', width: '100%', maxWidth: '500px' }}>
           {['APPROVED', 'GATE_IN', 'MEET_IN', 'MEET_OVER'].includes(currentPass.status) && (
             <button onClick={handlePrint} className="apple-btn-primary flex-1">Print Pass</button>
           )}
@@ -92,10 +90,10 @@ function DigitalPass({ pass, onBack }) {
         </div>
 
         {currentPass.status === 'PENDING' && (
-          <div className="apple-alert-info" style={{ width: '100%', maxWidth: '480px' }}>
+          <div className="apple-alert-info no-print" style={{ width: '100%', maxWidth: '500px' }}>
             <span style={{ fontSize: '1.2rem', display: 'block', marginBottom: '0.5rem' }}>⏳</span>
             Awaiting verification from <strong>{currentPass.host_name}</strong>.<br/>
-            <small className="text-secondary">This page will update automatically once approved.</small>
+            <small className="text-secondary" style={{ fontWeight: 600 }}>This page will update automatically once approved.</small>
           </div>
         )}
       </motion.div>

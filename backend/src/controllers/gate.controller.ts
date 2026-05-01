@@ -46,16 +46,19 @@ export const checkIn = async (req: Request, res: Response) => {
 
 export const checkOut = async (req: Request, res: Response) => {
   try {
-    const { token, visitorCode } = req.body;
+    const { token, visitorCode, bypassKey } = req.body; 
     let visitor;
 
     if (token) {
       const decoded: any = jwt.verify(token, process.env.JWT_SECRET as string);
       visitor = await Visitor.findById(decoded.visitorId);
     } else if (visitorCode) {
+      const isAuthorizedPersonnel = req.user && (req.user.role === 'GUARD' || req.user.role === 'ADMIN');
+      if (!isAuthorizedPersonnel && bypassKey !== process.env.GUARD_BYPASS_KEY) {
+        return res.status(403).json({ error: 'Security Violation: Guard authorization required for exit.' });
+      }
       visitor = await Visitor.findOne({ visitor_code: visitorCode });
     }
-
     if (!visitor) return res.status(404).json({ error: 'Visitor not found' });
 
     // LOGIC: Allow checkout from any active status
