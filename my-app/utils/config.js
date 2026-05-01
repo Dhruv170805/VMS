@@ -30,18 +30,26 @@ export const safeJson = async (res) => {
   try {
     const text = await res.text();
     if (!text) return null;
+    
+    // Check if the response actually looks like JSON
+    const looksLikeJson = (text.trim().startsWith('{') || text.trim().startsWith('['));
+    
+    if (!looksLikeJson) {
+      return { 
+        error: `Server returned a non-JSON response (${res.status}).`,
+        details: text.slice(0, 100) // Capture start of message for debugging
+      };
+    }
+
     try {
       return JSON.parse(text);
     } catch (e) {
-      // Encountered HTML or malformed string (e.g. Vercel 404 page)
-      if (text.includes('<!DOCTYPE html>') || text.includes('<html')) {
-        return { error: `Server returned an error page (${res.status}). Check backend connection.` };
-      }
-      throw e;
+      // Fallback for cases where it looked like JSON but was malformed
+      return { error: "Malformed JSON response from server." };
     }
   } catch (err) {
-    console.error("SafeJson Error:", err);
-    return { error: "Network error or invalid server response." };
+    console.error("SafeJson Network/Stream Error:", err);
+    return { error: "Network error or connection lost." };
   }
 };
 
