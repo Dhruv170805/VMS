@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { motion, animate } from 'framer-motion';
 import GlassCard from '@/components/GlassCard';
-import { API_BASE, fetchAuth } from '@/utils/config';
+import { API_BASE, fetchAuth, safeJson } from '@/utils/config';
 
 function AnimatedNumber({ value }) {
   const [displayValue, setDisplayValue] = useState(0);
@@ -156,4 +156,6 @@ export default function Dashboard() {
       </div>
     </motion.div>
   );
+}
+);
 }

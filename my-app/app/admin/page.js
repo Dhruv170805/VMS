@@ -53,15 +53,17 @@ function AdminPanelContent() {
         fetchAuth(`${API_BASE}/blacklist`)
       ]);
 
-      if (vRes.ok) setPending(await vRes.json());
-      if (eRes.ok) setEmployees(await eRes.json());
-      if (logRes.ok) setLogs(await logRes.json());
+      if (vRes.ok) setPending(await safeJson(vRes));
+      if (eRes.ok) setEmployees(await safeJson(eRes));
+      if (logRes.ok) setLogs(await safeJson(logRes));
       if (statsRes.ok) {
-        const allToday = await statsRes.json();
-        setAllHistory(allToday);
-        setActiveVisits(allToday.filter(v => ['GATE_IN', 'MEET_IN', 'MEET_OVER', 'APPROVED'].includes(v.status)));
+        const allToday = await safeJson(statsRes);
+        if (Array.isArray(allToday)) {
+          setAllHistory(allToday);
+          setActiveVisits(allToday.filter(v => ['GATE_IN', 'MEET_IN', 'MEET_OVER', 'APPROVED'].includes(v.status)));
+        }
       }
-      if (blRes.ok) setBlacklist(await blRes.json());
+      if (blRes.ok) setBlacklist(await safeJson(blRes));
     } catch (err) { 
       console.error("Admin Fetch Error:", err); 
     }
