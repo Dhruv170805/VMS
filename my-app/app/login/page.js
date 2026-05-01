@@ -22,8 +22,8 @@ export default function LoginPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
+      const data = await safeJson(res);
+      if (!res.ok || data.error) throw new Error(data.error || 'Login failed');
       localStorage.setItem('token', data.token);
       localStorage.setItem('role', data.role);
       localStorage.setItem('name', data.name);
