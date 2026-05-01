@@ -6,19 +6,23 @@ const GlassCard = ({ children, className = '', ...props }) => {
 
   const handleMouseMove = (e) => {
     if (!cardRef.current) return;
-    const rect = cardRef.current.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    
+    window.requestAnimationFrame(() => {
+      if (!cardRef.current) return;
+      const rect = cardRef.current.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
 
-    const tiltX = (y / rect.height - 0.5) * 5;
-    const tiltY = (x / rect.width - 0.5) * -5;
+      const tiltX = (y / rect.height - 0.5) * 5;
+      const tiltY = (x / rect.width - 0.5) * -5;
 
-    setStyle({
-      '--mouse-x': `${x}px`,
-      '--mouse-y': `${y}px`,
-      '--tilt-x': `${tiltX}deg`,
-      '--tilt-y': `${tiltY}deg`,
-      '--active-tilt': '1',
+      setStyle({
+        '--mouse-x': `${x}px`,
+        '--mouse-y': `${y}px`,
+        '--tilt-x': `${tiltX}deg`,
+        '--tilt-y': `${tiltY}deg`,
+        '--active-tilt': '1',
+      });
     });
   };
 
