@@ -5,12 +5,15 @@ export const metadata = {
   title: "NG-VMS | Next Generation Visitor Management",
   description: "Apple VisionOS-inspired Visitor Management System",
   manifest: "/manifest.json",
-  themeColor: "#007AFF",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "NG-VMS",
   },
+};
+
+export const viewport = {
+  themeColor: "#007AFF",
 };
 
 import { ConfigProvider } from "@/context/ConfigContext";
