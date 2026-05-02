@@ -38,9 +38,9 @@ The backend is a RESTful API built on **Express.js** and **TypeScript**.
 ---
 
 ## 🔄 Data Flow (Visitor Registration)
-1. **Visitor** enters details via `my-app/visitor`.
+1. **Visitor** enters details via `frontend/visitor`.
 2. **Frontend** captures photo and ID via `react-webcam`, compresses on-the-fly.
 3. **Backend** validates data, creates a `PENDING` visitor record, and returns a unique `visitor_code`.
-4. **Employee** receives request on `my-app/host`, approves/denies.
+4. **Employee** receives request on `frontend/host`, approves/denies.
 5. **Visitor Pass** updates in real-time via polling.
 6. **Security Guard** scans/verifies the `DigitalPass` at the gate.
