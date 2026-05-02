@@ -45,7 +45,7 @@ function GuardPanelContent() {
 
   const fetchStats = async () => {
     try {
-      const res = await fetchAuth(\`\${API_BASE}/dashboard/stats\`);
+      const res = await fetchAuth(`${API_BASE}/dashboard/stats`);
       if (res.ok) {
         setStats(await safeJson(res));
         setError(null);
@@ -59,7 +59,7 @@ function GuardPanelContent() {
   };
 
   const fetchTimeline = async (visitorId) => {
-    const res = await fetchAuth(\`\${API_BASE}/visitor/\${visitorId}/timeline\`);
+    const res = await fetchAuth(`${API_BASE}/visitor/${visitorId}/timeline`);
     if (res.ok) {
       setTimeline(await safeJson(res));
     }
@@ -79,7 +79,7 @@ function GuardPanelContent() {
       ? { visitorCode: input, gateId: GATE_ID } 
       : { token: input, gateId: GATE_ID };
     
-    const res = await fetchAuth(\`\${API_BASE}/gate/\${action}\`, {
+    const res = await fetchAuth(`${API_BASE}/gate/${action}`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(payload)
