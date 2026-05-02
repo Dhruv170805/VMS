@@ -9,6 +9,102 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import { haptic, usePullToRefresh } from '@/utils/hooks';
 import { API_BASE, fetchAuth, safeJson } from '@/utils/config';
 import { useConfig } from '@/context/ConfigContext';
+import { motion } from 'framer-motion';
+
+function AdminDashboard({ stats, activeVisits, pending }) {
+  // Use real data where available, fallback to placeholders for analytics if not fully implemented in API yet
+  const displayStats = {
+    approved: activeVisits.filter(v => v.status === 'APPROVED' || v.status === 'GATE_IN' || v.status === 'MEET_IN').length,
+    pending: pending.length,
+    checkin: activeVisits.filter(v => v.status === 'GATE_IN' || v.status === 'MEET_IN').length,
+    rejected: 0, // Need rejected from API or history
+  };
+
+  return (
+    <motion.div
+      className="admin-container"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+    >
+      <div className="admin-header glass-card">
+        <h1 style={{ fontSize: '2.5rem', fontWeight: 900, letterSpacing: '-1px', margin: 0 }}>NG-VMS Admin</h1>
+        <p className="text-secondary" style={{ fontWeight: 700, letterSpacing: '1px', textTransform: 'uppercase' }}>Visitor Control Center</p>
+      </div>
+
+      <div className="stats-grid">
+        <StatCard title="Approved" value={displayStats.approved} type="approved" />
+        <StatCard title="Pending" value={displayStats.pending} type="pending" />
+        <StatCard title="Gate In" value={displayStats.checkin} type="checkin" />
+        <StatCard title="Rejected" value={displayStats.rejected} type="rejected" />
+      </div>
+
+      <div className="analytics glass-card">
+        <h2 style={{ marginBottom: '20px', fontSize: '1.2rem' }}>Visitor Trends</h2>
+        <div className="chart">
+          {[30, 50, 20, 70, 40, 90, 60].map((h, i) => (
+            <motion.div
+              key={i}
+              className="bar"
+              initial={{ height: 0 }}
+              animate={{ height: \`\${h}%\` }}
+              transition={{ delay: i * 0.1, type: 'spring' }}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div className="glass-card table-card" style={{ marginTop: '30px' }}>
+        <h2 style={{ marginBottom: '20px', fontSize: '1.2rem' }}>Recent Activity</h2>
+        <div className="apple-table-container">
+          <table className="apple-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Purpose</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {activeVisits.slice(0, 5).map((v, i) => (
+                <Row key={i} name={v.name} purpose={v.purpose} status={v.status} />
+              ))}
+              {pending.slice(0, 3).map((v, i) => (
+                <Row key={\`p-\${i}\`} name={v.name} purpose={v.purpose} status={v.status} />
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+function StatCard({ title, value, type }) {
+  return (
+    <motion.div
+      className={\`glass-card stat-card \${type}\`}
+      whileHover={{ y: -6, scale: 1.02 }}
+      style={{ padding: '25px', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '10px' }}
+    >
+      <h3 style={{ fontSize: '3rem', margin: 0, fontWeight: 900 }}>{value}</h3>
+      <p style={{ margin: 0, fontSize: '0.8rem', fontWeight: 800, letterSpacing: '1px', textTransform: 'uppercase', color: 'var(--apple-text-muted)' }}>{title}</p>
+    </motion.div>
+  );
+}
+
+function Row({ name, purpose, status }) {
+  return (
+    <tr className="row">
+      <td><strong>{name}</strong></td>
+      <td>{purpose}</td>
+      <td><span className={\`status-badge-glass \${status}\`}>{status}</span></td>
+      <td>
+        <button className="apple-btn-secondary" style={{ padding: '6px 12px', fontSize: '0.8rem' }}>View</button>
+      </td>
+    </tr>
+  );
+}
 
 function AdminPanelContent() {
   const { config: sysConfig, refreshConfig } = useConfig();

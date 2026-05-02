@@ -7,7 +7,8 @@ import {
   updateVisitorStatus,
   getHostVisitors,
   getVisitorProfile,
-  getVisitorByCode
+  getVisitorByCode,
+  getVisitorTimeline
 } from '../controllers/visitor.controller';
 import { checkIn, checkOut } from '../controllers/gate.controller';
 import { getStats, getDetailedStats } from '../controllers/dashboard.controller';
@@ -39,6 +40,7 @@ router.get('/visitor/active', authMiddleware(['ADMIN', 'GUARD']), getDetailedSta
 // Parameterized routes
 router.get('/visitor/host/:hostId', authMiddleware(['EMPLOYEE', 'ADMIN']), getHostVisitors);
 router.get('/visitor/track/:code', getVisitorByCode); // Public
+router.get('/visitor/:id/timeline', authMiddleware(['ADMIN', 'GUARD']), getVisitorTimeline);
 router.post('/visitor/:id/approve', authMiddleware(['EMPLOYEE', 'ADMIN']), approveVisitor);
 router.patch('/visitor/:id/status', authMiddleware(['EMPLOYEE', 'ADMIN', 'GUARD']), updateVisitorStatus);
 

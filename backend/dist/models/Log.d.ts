@@ -4,6 +4,8 @@ export interface ILog extends Document {
     event: string;
     timestamp: Date;
     actor: string;
+    gate_id?: string;
+    meta?: any;
 }
 declare const _default: mongoose.Model<ILog, {}, {}, {}, mongoose.Document<unknown, {}, ILog, {}, mongoose.DefaultSchemaOptions> & ILog & Required<{
     _id: mongoose.Types.ObjectId;

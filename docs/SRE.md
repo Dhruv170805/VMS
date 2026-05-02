@@ -1,4 +1,4 @@
-# SRE & Reliability Documentation | VMS
+# SRE & Reliability Documentation | NG-VMS
 
 ## 📈 Service Level Objectives (SLOs)
 - **Availability**: 99.9% (Measured by successful status codes on `/api/health`).

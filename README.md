@@ -1,11 +1,11 @@
-#  VMS | Apple-Level Visitor Management System
+#  NG-VMS | Next Generation Visitor Management System
 
 [![Framework: Next.js](https://img.shields.io/badge/Frontend-Next.js-000000?style=flat-square&logo=next.js)](https://nextjs.org)
 [![Backend: Node.js](https://img.shields.io/badge/Backend-Node.js-339933?style=flat-square&logo=node.js)](https://nodejs.org)
 [![Database: MongoDB](https://img.shields.io/badge/Database-MongoDB-47A248?style=flat-square&logo=mongodb)](https://www.mongodb.com/)
 [![UI: visionOS Style](https://img.shields.io/badge/UI-visionOS--Style-0071e3?style=flat-square)](https://developer.apple.com/visionos/)
 
-A high-performance, production-ready Visitor Management System (VMS) featuring a premium **Apple visionOS-inspired Liquid Glass UI**. Built for security, speed, and seamless user interaction.
+A high-performance, production-ready Visitor Management System (NG-VMS) featuring a premium **Apple visionOS-inspired Liquid Glass UI**. Built for security, speed, and seamless user interaction.
 
 ---
 

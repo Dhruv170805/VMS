@@ -7,10 +7,10 @@ const ConfigContext = createContext();
 
 export function ConfigProvider({ children }) {
   const [config, setConfig] = useState({
-    appName: 'VMS',
-    appSubtitle: 'Smart Visitor System',
+    appName: 'NG-VMS',
+    appSubtitle: 'Next Generation Series - Visitor Management System',
     companyName: 'Apple Studio',
-    visitorCodePrefix: 'VMS'
+    visitorCodePrefix: 'NG'
   });
   const [error, setError] = useState(null);
 

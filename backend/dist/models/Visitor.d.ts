@@ -11,6 +11,10 @@ export interface IVisitor extends Document {
     purpose: 'OFFICE' | 'INTERNSHIP' | 'TRAINING' | 'DELIVERY' | 'INTERVIEW' | 'OTHER';
     host_id: mongoose.Types.ObjectId;
     visitor_code: string;
+    approval_level: 'EMPLOYEE' | 'MANAGER' | 'ADMIN';
+    priority: 'VIP' | 'NORMAL' | 'LOW';
+    visit_time: Date;
+    approved_by: string[];
     validity: {
         from: Date;
         to: Date;

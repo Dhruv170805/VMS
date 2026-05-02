@@ -76,7 +76,10 @@ const getEmployees = async (req, res) => {
     try {
         const { activeOnly } = req.query;
         const filter = activeOnly === 'true' ? { isActive: true } : {};
-        const employees = await Employee_1.default.find(filter).sort({ name: 1 });
+        // SECURITY: If not authenticated or not an Admin, strictly project public fields
+        const isAdmin = req.user && req.user.role === 'ADMIN';
+        const projection = isAdmin ? {} : { name: 1, department: 1, _id: 1 };
+        const employees = await Employee_1.default.find(filter, projection).sort({ name: 1 });
         res.json(employees);
     }
     catch (error) {

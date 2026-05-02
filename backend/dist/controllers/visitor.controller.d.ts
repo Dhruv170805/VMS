@@ -6,3 +6,4 @@ export declare const approveVisitor: (req: Request, res: Response) => Promise<Re
 export declare const getVisitorProfile: (req: Request, res: Response) => Promise<Response<any, Record<string, any>> | undefined>;
 export declare const getVisitorByCode: (req: Request, res: Response) => Promise<Response<any, Record<string, any>> | undefined>;
 export declare const updateVisitorStatus: (req: Request, res: Response) => Promise<Response<any, Record<string, any>> | undefined>;
+export declare const getVisitorTimeline: (req: Request, res: Response) => Promise<void>;

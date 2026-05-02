@@ -15,15 +15,37 @@ function GuardPanelContent() {
   const [stats, setStats] = useState(null);
   const [name, setName] = useState('');
   const [error, setError] = useState(null);
+  const [timeline, setTimeline] = useState([]);
+  const [activeVisitor, setActiveVisitor] = useState(null);
   const router = useRouter();
 
   useEffect(() => {
     setName(localStorage.getItem('name'));
+
+    const socket = io(API_BASE.replace('/api', ''), {
+      transports: ['websocket']
+    });
+
+    socket.on('gate:checkin', (data) => {
+      fetchStats();
+      haptic('light');
+    });
+
+    socket.on('gate:checkout', (data) => {
+      fetchStats();
+      haptic('light');
+    });
+
+    socket.on('gate:denied', (data) => {
+      haptic('error');
+    });
+
+    return () => socket.disconnect();
   }, []);
 
   const fetchStats = async () => {
     try {
-      const res = await fetchAuth(`${API_BASE}/dashboard/stats`);
+      const res = await fetchAuth(\`\${API_BASE}/dashboard/stats\`);
       if (res.ok) {
         setStats(await safeJson(res));
         setError(null);
@@ -33,6 +55,13 @@ function GuardPanelContent() {
     } catch (err) { 
       console.error(err); 
       setError("Connection to security server lost.");
+    }
+  };
+
+  const fetchTimeline = async (visitorId) => {
+    const res = await fetchAuth(\`\${API_BASE}/visitor/\${visitorId}/timeline\`);
+    if (res.ok) {
+      setTimeline(await safeJson(res));
     }
   };
 
@@ -46,15 +75,31 @@ function GuardPanelContent() {
 
   const handleGate = async (action) => {
     haptic('light');
-    const payload = input.startsWith('VMS-') || input.includes('-') ? { visitorCode: input } : { token: input };
-    const res = await fetchAuth(`${API_BASE}/gate/${action}`, {
+    const payload = input.startsWith('NG-') || input.includes('-') 
+      ? { visitorCode: input, gateId: GATE_ID } 
+      : { token: input, gateId: GATE_ID };
+    
+    const res = await fetchAuth(\`\${API_BASE}/gate/\${action}\`, {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
       body: JSON.stringify(payload)
     });
     const d = await safeJson(res);
-    if (res.ok) haptic('success'); else haptic('error');
-    setMsg({ text: d?.message || d?.error || "Unknown Error", type: res.ok ? 'success' : 'error' });
+    
+    if (res.ok) {
+      haptic('success');
+      setActiveVisitor(d.visitor);
+      fetchTimeline(d.visitor._id);
+    } else {
+      haptic('error');
+    }
+
+    setMsg({ 
+      text: d?.message || d?.error || "Unknown Error", 
+      type: res.ok ? 'success' : 'error',
+      reason: d?.reason
+    });
+
     if (res.ok) {
       setInput('');
       fetchStats();
@@ -107,7 +152,7 @@ function GuardPanelContent() {
           <div className="apple-input-group-vertical" style={{ marginTop: '2rem' }}>
             <input 
               type="text" 
-              placeholder="VMS-CODE or TOKEN..." 
+              placeholder="NG-CODE or TOKEN..." 
               value={input} 
               onChange={e => setInput(e.target.value.toUpperCase())} 
               style={{ fontSize: '1.5rem', textAlign: 'center', padding: '1.5rem' }}
@@ -117,8 +162,49 @@ function GuardPanelContent() {
               <button onClick={() => handleGate('checkout')} className="apple-btn-secondary flex-1">MARK EXIT</button>
             </div>
           </div>
-          {msg && <div className={`apple-alert-${msg.type}`} style={{ marginTop: '1.5rem', padding: '1rem', borderRadius: '12px', textAlign: 'center', background: msg.type === 'success' ? 'rgba(52, 199, 89, 0.1)' : 'rgba(255, 59, 48, 0.1)', color: msg.type === 'success' ? '#248a3d' : '#ff3b30' }}>{msg.text}</div>}
+          {msg && (
+            <div className={`apple-alert-${msg.type}`} style={{ 
+              marginTop: '1.5rem', 
+              padding: '1.5rem', 
+              borderRadius: '20px', 
+              textAlign: 'center', 
+              background: msg.type === 'success' ? 'rgba(52, 199, 89, 0.1)' : 'rgba(255, 59, 48, 0.1)', 
+              color: msg.type === 'success' ? '#248a3d' : '#ff3b30',
+              border: `1px solid ${msg.type === 'success' ? 'rgba(52, 199, 89, 0.2)' : 'rgba(255, 59, 48, 0.2)'}`
+            }}>
+              <div style={{ fontSize: '1.2rem', fontWeight: 800 }}>{msg.type === 'success' ? 'SUCCESS' : 'ACCESS DENIED'}</div>
+              <div style={{ marginTop: '0.5rem' }}>{msg.text}</div>
+              {msg.reason && <div style={{ fontSize: '0.8rem', opacity: 0.8, marginTop: '0.5rem' }}>Reason: {msg.reason}</div>}
+            </div>
+          )}
         </GlassCard>
+
+        {activeVisitor && (
+          <GlassCard className="main-glass" style={{ marginTop: '2rem' }}>
+            <h3>Visitor Audit Timeline</h3>
+            <p className="text-secondary" style={{ marginBottom: '1.5rem' }}>History for {activeVisitor.name}</p>
+            <div className="timeline-container" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {timeline.map((log, i) => (
+                <div key={i} className="timeline-item" style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center',
+                  padding: '1rem',
+                  background: 'rgba(0,0,0,0.02)',
+                  borderRadius: '15px'
+                }}>
+                  <div>
+                    <strong style={{ display: 'block' }}>{log.event}</strong>
+                    <small className="text-secondary">By {log.actor} {log.gate_id ? `@ ${log.gate_id}` : ''}</small>
+                  </div>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 600 }}>
+                    {new Date(log.timestamp).toLocaleTimeString()}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </GlassCard>
+        )}
       </main>
     </div>
   );

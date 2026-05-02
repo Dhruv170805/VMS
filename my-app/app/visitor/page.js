@@ -66,7 +66,7 @@ export default function VisitorPage() {
         body: JSON.stringify(formData)
       });
       const data = await safeJson(response);
-      if (!response.ok) throw new Error(data?.error?.[0]?.message || data?.error || 'Registration failed');
+      if (!response.ok) throw new Error(data?.error || 'Registration failed');
       
       const host = employees.find(e => e._id === formData.host_id);
       setVisitorPass({ 

@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import GlassCard from '@/components/GlassCard';
-import { API_BASE } from '@/utils/config';
+import { API_BASE, safeJson } from '@/utils/config';
 import { useConfig } from '@/context/ConfigContext';
 
 export default function LoginPage() {

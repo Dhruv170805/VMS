@@ -77,9 +77,19 @@ export const getHostVisitors = async (req: Request, res: Response) => {
       filter.status = status;
     }
 
+    const priorityOrder: any = { VIP: 1, NORMAL: 2, LOW: 3 };
+
     const visitors = await Visitor.find(filter)
       .populate('host_id')
       .sort({ created_at: -1 });
+    
+    // Custom sort: Priority first, then Visit Time
+    visitors.sort((a: any, b: any) => {
+      if (priorityOrder[a.priority] !== priorityOrder[b.priority]) {
+        return priorityOrder[a.priority] - priorityOrder[b.priority];
+      }
+      return new Date(a.visit_time).getTime() - new Date(b.visit_time).getTime();
+    });
       
     res.json(visitors);
   } catch (error: any) {
@@ -102,26 +112,45 @@ export const approveVisitor = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { status } = VisitorApprovalSchema.parse(req.body);
+    const user = (req as any).user;
     
-    const updateData: any = { status };
-    if (status === 'APPROVED') {
-      updateData['visit_timestamps.approved_at'] = new Date();
+    const visitor = await Visitor.findById(id).populate('host_id');
+    if (!visitor) return res.status(404).json({ error: 'Visitor not found' });
+
+    if (status === 'REJECTED') {
+      visitor.status = 'REJECTED';
+    } else if (status === 'APPROVED') {
+      const actorRole = user.role;
+      const currentLevel = visitor.approval_level;
+
+      if (!visitor.approved_by.includes(`${user.name} (${actorRole})`)) {
+        visitor.approved_by.push(`${user.name} (${actorRole})`);
+      }
+
+      if (actorRole === 'EMPLOYEE' && currentLevel === 'EMPLOYEE') {
+        visitor.approval_level = 'MANAGER';
+      } else if (actorRole === 'MANAGER' || (actorRole === 'EMPLOYEE' && currentLevel === 'MANAGER')) {
+        visitor.approval_level = 'ADMIN';
+      } else if (actorRole === 'ADMIN' || currentLevel === 'ADMIN') {
+        visitor.status = 'APPROVED';
+        visitor.visit_timestamps.approved_at = new Date();
+      } else {
+        visitor.status = 'APPROVED';
+        visitor.visit_timestamps.approved_at = new Date();
+      }
     }
 
-    const visitor = await Visitor.findByIdAndUpdate(id, updateData, { new: true }).populate('host_id');
-    
-    if (!visitor) {
-      return res.status(404).json({ error: 'Visitor not found' });
-    }
+    await visitor.save();
 
     await new Log({
       visitor_id: visitor._id,
-      event: status,
-      actor: 'HOST'
+      event: visitor.status === 'APPROVED' ? 'APPROVED' : (status === 'REJECTED' ? 'REJECTED' : `ESCALATED_TO_${visitor.approval_level}`),
+      actor: user.name,
+      meta: { role: user.role, level: visitor.approval_level }
     }).save();
 
     let qrCode = null;
-    if (status === 'APPROVED') {
+    if (visitor.status === 'APPROVED') {
       const expiresIn = Math.floor((visitor.validity.to.getTime() - Date.now()) / 1000);
       if (expiresIn > 0) {
         qrCode = jwt.sign(
@@ -132,7 +161,11 @@ export const approveVisitor = async (req: Request, res: Response) => {
       }
     }
 
-    res.json({ message: `Visitor ${status.toLowerCase()} successfully`, visitor, qrCode });
+    res.json({ 
+      message: visitor.status === 'APPROVED' ? 'Visitor approved successfully' : `Visitor escalated to ${visitor.approval_level}`, 
+      visitor, 
+      qrCode 
+    });
   } catch (error: any) {
     const errorMessage = error.errors ? error.errors.map((e: any) => `${e.path.join('.')}: ${e.message}`).join(', ') : error.message;
     res.status(400).json({ error: errorMessage });
@@ -214,6 +247,16 @@ export const updateVisitorStatus = async (req: Request, res: Response) => {
     }).save();
 
     res.json({ message: `Status updated to ${status}`, visitor });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const getVisitorTimeline = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const logs = await Log.find({ visitor_id: id }).sort({ timestamp: 1 });
+    res.json(logs);
   } catch (error: any) {
     res.status(500).json({ error: error.message });
   }

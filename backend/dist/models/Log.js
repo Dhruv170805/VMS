@@ -38,7 +38,9 @@ const LogSchema = new mongoose_1.Schema({
     visitor_id: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Visitor', required: true, index: true },
     event: { type: String, required: true },
     timestamp: { type: Date, default: Date.now },
-    actor: { type: String, required: true }
+    actor: { type: String, required: true },
+    gate_id: { type: String },
+    meta: { type: mongoose_1.Schema.Types.Mixed }
 });
 exports.default = mongoose_1.default.model('Log', LogSchema);
 //# sourceMappingURL=Log.js.map

@@ -46,34 +46,38 @@ const setup = async (req, res) => {
         if (setupKey !== process.env.SETUP_KEY) {
             return res.status(401).json({ error: 'Invalid Setup Key' });
         }
-        let hostEmployee = await Employee_1.default.findOne({ email: 'host@vms.com' });
+        const initialPassword = process.env.INITIAL_PASSWORD || 'Vms@12345';
+        const adminEmail = process.env.ADMIN_EMAIL || 'admin@vms.com';
+        const guardEmail = process.env.GUARD_EMAIL || 'guard@vms.com';
+        const hostEmail = process.env.HOST_EMAIL || 'host@vms.com';
+        let hostEmployee = await Employee_1.default.findOne({ email: hostEmail });
         if (!hostEmployee) {
             hostEmployee = new Employee_1.default({
-                name: 'John Host',
-                email: 'host@vms.com',
-                phone: '9876543210',
-                department: 'IT',
-                designation: 'Manager'
+                name: 'Initial Host',
+                email: hostEmail,
+                phone: '0000000000',
+                department: 'Management',
+                designation: 'Staff'
             });
             await hostEmployee.save();
         }
         const users = [
-            { name: 'Admin User', email: 'admin@vms.com', role: 'ADMIN' },
-            { name: 'Gate Guard', email: 'guard@vms.com', role: 'GUARD' },
-            { name: 'Staff Host', email: 'host@vms.com', role: 'EMPLOYEE', employeeId: hostEmployee._id }
+            { name: 'Admin User', email: adminEmail, role: 'ADMIN' },
+            { name: 'Gate Guard', email: guardEmail, role: 'GUARD' },
+            { name: 'Staff Host', email: hostEmail, role: 'EMPLOYEE', employeeId: hostEmployee._id }
         ];
         for (const u of users) {
             const exists = await User_1.default.findOne({ email: u.email });
             if (!exists) {
-                await new User_1.default({ ...u, password: 'Vms@12345' }).save();
+                await new User_1.default({ ...u, password: initialPassword }).save();
             }
             else {
-                exists.password = 'Vms@12345';
+                exists.password = initialPassword;
                 exists.role = u.role;
                 await exists.save();
             }
         }
-        res.json({ message: 'System seeded successfully. Default password for all: Vms@12345' });
+        res.json({ message: `System seeded successfully. Default password for all: ${initialPassword}` });
     }
     catch (error) {
         res.status(500).json({ error: error.message });

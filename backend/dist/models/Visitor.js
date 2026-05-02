@@ -54,6 +54,18 @@ const VisitorSchema = new mongoose_1.Schema({
     },
     host_id: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Employee', required: true, index: true },
     visitor_code: { type: String, unique: true, required: true },
+    approval_level: {
+        type: String,
+        enum: ['EMPLOYEE', 'MANAGER', 'ADMIN'],
+        default: 'EMPLOYEE'
+    },
+    priority: {
+        type: String,
+        enum: ['VIP', 'NORMAL', 'LOW'],
+        default: 'NORMAL'
+    },
+    visit_time: { type: Date, default: Date.now },
+    approved_by: [{ type: String }],
     validity: {
         from: { type: Date, required: true },
         to: { type: Date, required: true }

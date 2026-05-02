@@ -8,6 +8,7 @@ import ProtectedRoute from '@/components/ProtectedRoute';
 import { haptic, usePullToRefresh } from '@/utils/hooks';
 import { API_BASE, fetchAuth, safeJson } from '@/utils/config';
 import { useConfig } from '@/context/ConfigContext';
+import { io } from 'socket.io-client';
 
 function HostDashboardContent() {
   const { config: sysConfig } = useConfig();
@@ -18,6 +19,8 @@ function HostDashboardContent() {
   const [name, setName] = useState('');
   const [error, setError] = useState(null);
   const [now, setNow] = useState(new Date());
+  const [activeTimeline, setActiveTimeline] = useState(null);
+  const [timelineData, setTimelineData] = useState([]);
   const router = useRouter();
 
   useEffect(() => {
@@ -30,7 +33,37 @@ function HostDashboardContent() {
     }
     setHostId(eId);
     setName(localStorage.getItem('name'));
+
+    // Socket.io for real-time notifications
+    const socket = io(API_BASE.replace('/api', ''), {
+      transports: ['websocket']
+    });
+
+    socket.on('visitor:new', (data) => {
+      if (data.host_id === eId || data.host_id?._id === eId) {
+        haptic('heavy');
+        fetchData();
+        if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+          new Notification('New Visitor Request', { body: `${data.name} is waiting for you.` });
+        }
+      }
+    });
+
+    if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+
+    return () => socket.disconnect();
   }, []);
+
+  const fetchTimeline = async (id) => {
+    haptic('light');
+    const res = await fetchAuth(`${API_BASE}/visitor/${id}/timeline`);
+    if (res.ok) {
+      setTimelineData(await safeJson(res));
+      setActiveTimeline(id);
+    }
+  };
 
   // Real-time ticker for Meeting Timer
   useEffect(() => {
@@ -150,11 +183,21 @@ function HostDashboardContent() {
                       onSwipeRight={() => handleAction(v._id, 'APPROVED')}
                       onSwipeLeft={() => handleAction(v._id, 'REJECTED')}
                     >
-                      <div className="glass" style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', padding: '1.5rem', width: '100%' }}>
+                      <div className={`glass ${v.priority === 'VIP' ? 'vip-border' : ''}`} style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', padding: '1.5rem', width: '100%', position: 'relative' }}>
+                        {v.priority === 'VIP' && <span className="vip-badge">VIP</span>}
                         <img src={v.photo_base64} style={{ width: '70px', height: '70px', borderRadius: '20px', objectFit: 'cover', border: '3px solid white', boxShadow: '0 8px 20px rgba(0,0,0,0.1)' }} alt="" />
                         <div style={{ flex: 1 }}>
-                          <strong style={{ display: 'block', fontSize: '1.2rem', fontWeight: 800 }}>{v.name}</strong>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <strong style={{ fontSize: '1.2rem', fontWeight: 800 }}>{v.name}</strong>
+                            <span className="text-secondary" style={{ fontSize: '0.8rem', fontWeight: 700 }}>{new Date(v.visit_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                          </div>
                           <span className="text-secondary" style={{ fontSize: '0.95rem', fontWeight: 600 }}>{v.company} • {v.purpose}</span>
+                          <div style={{ marginTop: '5px' }}>
+                            <button onClick={() => fetchTimeline(v._id)} style={{ background: 'transparent', border: 'none', color: 'var(--apple-blue)', fontSize: '0.75rem', fontWeight: 800, padding: 0, cursor: 'pointer' }}>VIEW HISTORY</button>
+                            {v.approval_level !== 'EMPLOYEE' && (
+                              <span style={{ marginLeft: '10px', fontSize: '0.65rem', fontWeight: 900, color: 'var(--apple-orange)', textTransform: 'uppercase' }}>Escalated to {v.approval_level}</span>
+                            )}
+                          </div>
                         </div>
                         <div className="item-actions" style={{ display: 'flex', gap: '1rem' }}>
                           <button className="apple-btn-success" onClick={() => handleAction(v._id, 'APPROVED')}>Allow</button>
@@ -163,6 +206,23 @@ function HostDashboardContent() {
                       </div>
                     </SwipeableItem>
                   ))}
+                  
+                  {activeTimeline && (
+                    <div className="timeline-overlay glass-card" style={{ marginTop: '1rem', padding: '1.5rem', border: '2px solid var(--apple-blue)' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+                        <h4 style={{ margin: 0 }}>Visitor Audit Trail</h4>
+                        <button onClick={() => setActiveTimeline(null)} style={{ background: 'transparent', border: 'none', fontSize: '1.2rem', cursor: 'pointer' }}>✕</button>
+                      </div>
+                      <div className="timeline-scroll" style={{ maxHeight: '200px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                        {timelineData.map((l, i) => (
+                          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', padding: '8px', background: 'rgba(0,0,0,0.02)', borderRadius: '10px' }}>
+                            <strong>{l.event}</strong>
+                            <span className="text-secondary">{new Date(l.timestamp).toLocaleTimeString()}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>

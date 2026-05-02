@@ -1,7 +1,7 @@
-# System Architecture | VMS
+# System Architecture | NG-VMS
 
 ## 🛰️ Overview
-The Visitor Management System (VMS) is designed as a decoupled full-stack application. It emphasizes high-fidelity UI performance and secure, role-based backend operations.
+The Next Generation Visitor Management System (NG-VMS) is designed as a decoupled full-stack application. It emphasizes high-fidelity UI performance and secure, role-based backend operations.
 
 ## 🎨 Frontend: Next.js (App Router)
 The frontend utilizes **Next.js** for its robust routing and server-side optimization capabilities.

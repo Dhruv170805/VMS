@@ -8,8 +8,14 @@ export default function ClientWrapper({ children }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    // Spatial effects are now handled internally by GlassCard components
-    // for significantly better performance and battery efficiency.
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').then(
+          (registration) => console.log('SW registered: ', registration),
+          (registrationError) => console.log('SW registration failed: ', registrationError)
+        );
+      });
+    }
   }, []);
 
   return (

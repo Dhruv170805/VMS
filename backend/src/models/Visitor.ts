@@ -12,6 +12,10 @@ export interface IVisitor extends Document {
   purpose: 'OFFICE' | 'INTERNSHIP' | 'TRAINING' | 'DELIVERY' | 'INTERVIEW' | 'OTHER';
   host_id: mongoose.Types.ObjectId;
   visitor_code: string;
+  approval_level: 'EMPLOYEE' | 'MANAGER' | 'ADMIN';
+  priority: 'VIP' | 'NORMAL' | 'LOW';
+  visit_time: Date;
+  approved_by: string[];
   validity: {
     from: Date;
     to: Date;
@@ -47,6 +51,18 @@ const VisitorSchema: Schema = new Schema({
   },
   host_id: { type: Schema.Types.ObjectId, ref: 'Employee', required: true, index: true },
   visitor_code: { type: String, unique: true, required: true },
+  approval_level: { 
+    type: String, 
+    enum: ['EMPLOYEE', 'MANAGER', 'ADMIN'], 
+    default: 'EMPLOYEE' 
+  },
+  priority: { 
+    type: String, 
+    enum: ['VIP', 'NORMAL', 'LOW'], 
+    default: 'NORMAL' 
+  },
+  visit_time: { type: Date, default: Date.now },
+  approved_by: [{ type: String }],
   validity: {
     from: { type: Date, required: true },
     to: { type: Date, required: true }

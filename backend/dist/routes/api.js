@@ -31,6 +31,7 @@ router.get('/visitor/active', (0, auth_middleware_1.authMiddleware)(['ADMIN', 'G
 // Parameterized routes
 router.get('/visitor/host/:hostId', (0, auth_middleware_1.authMiddleware)(['EMPLOYEE', 'ADMIN']), visitor_controller_1.getHostVisitors);
 router.get('/visitor/track/:code', visitor_controller_1.getVisitorByCode); // Public
+router.get('/visitor/:id/timeline', (0, auth_middleware_1.authMiddleware)(['ADMIN', 'GUARD']), visitor_controller_1.getVisitorTimeline);
 router.post('/visitor/:id/approve', (0, auth_middleware_1.authMiddleware)(['EMPLOYEE', 'ADMIN']), visitor_controller_1.approveVisitor);
 router.patch('/visitor/:id/status', (0, auth_middleware_1.authMiddleware)(['EMPLOYEE', 'ADMIN', 'GUARD']), visitor_controller_1.updateVisitorStatus);
 // Gate Routes

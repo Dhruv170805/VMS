@@ -141,7 +141,7 @@ export default function Home() {
                 <div className="apple-input-group-vertical" style={{ gap: '1rem' }}>
                   <input 
                     type="text" 
-                    placeholder="ENTER VISITOR CODE (VMS-...)" 
+                    placeholder="ENTER VISITOR CODE (NG-...)" 
                     value={trackCode} 
                     onChange={e => setTrackCode(e.target.value.toUpperCase())} 
                     required 
