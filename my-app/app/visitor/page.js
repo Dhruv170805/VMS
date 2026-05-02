@@ -7,6 +7,7 @@ import DigitalPass from '@/components/DigitalPass';
 import CameraCapture from '@/components/CameraCapture';
 import { useConfig } from '@/context/ConfigContext';
 import { API_BASE, VISIT_PURPOSES, ID_TYPES, safeJson } from '@/utils/config';
+import { haptic } from '@/utils/hooks';
 
 export default function VisitorPage() {
   const { config: sysConfig } = useConfig();
@@ -37,6 +38,7 @@ export default function VisitorPage() {
     }
     setLoading(true);
     setError(null);
+    haptic('medium');
     try {
       const res = await fetch(`${API_BASE}/visitor/profile?name=${encodeURIComponent(formData.name)}&phone=${encodeURIComponent(formData.phone)}`);
       const data = await safeJson(res);
@@ -51,6 +53,20 @@ export default function VisitorPage() {
     finally { setLoading(false); }
   };
 
+  const handleOCR = (text) => {
+    console.log("OCR Result:", text);
+    const aadharMatch = text.match(/\d{4}\s?\d{4}\s?\d{4}/);
+    const panMatch = text.match(/[A-Z]{5}\d{4}[A-Z]{1}/);
+    
+    if (aadharMatch) {
+      setFormData(prev => ({ ...prev, id_number: aadharMatch[0], id_type: 'AADHAR' }));
+      haptic('success');
+    } else if (panMatch) {
+      setFormData(prev => ({ ...prev, id_number: panMatch[0], id_type: 'PAN' }));
+      haptic('success');
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.photo_base64 || !formData.id_photo_base64) {
@@ -59,6 +75,7 @@ export default function VisitorPage() {
     }
     setLoading(true);
     setError(null);
+    haptic('heavy');
     try {
       const response = await fetch(`${API_BASE}/visitor/register`, {
         method: 'POST',
@@ -164,7 +181,7 @@ export default function VisitorPage() {
                     </div>
                     <div className="capture-box-glass" style={{ background: 'rgba(0,0,0,0.02)', padding: '2rem', borderRadius: '30px', textAlign: 'center' }}>
                       <h5 style={{ marginBottom: '1.5rem', fontSize: '0.9rem', color: 'var(--apple-text-muted)' }}>ID DOCUMENT SCAN</h5>
-                      <CameraCapture onCapture={(img) => setFormData({...formData, id_photo_base64: img})} />
+                      <CameraCapture onCapture={(img) => setFormData({...formData, id_photo_base64: img})} onOCR={handleOCR} />
                       {formData.id_photo_base64 && <img src={formData.id_photo_base64} style={{ width: '100%', height: '200px', objectFit: 'cover', borderRadius: '20px', marginTop: '1.5rem' }} />}
                     </div>
                   </div>
@@ -173,7 +190,7 @@ export default function VisitorPage() {
             </div>
 
             <div className="form-actions-glass" style={{ marginTop: '4rem', display: 'flex', gap: '1.5rem' }}>
-              <button type="button" className="apple-btn-secondary" onClick={() => setStep(1)} style={{ padding: '1.2rem 3rem' }}>Go Back</button>
+              <button type="button" className="apple-btn-secondary" onClick={() => { haptic('light'); setStep(1); }} style={{ padding: '1.2rem 3rem' }}>Go Back</button>
               <button type="submit" className="apple-btn-primary flex-1" disabled={loading} style={{ padding: '1.2rem' }}>
                 {loading ? 'Processing...' : 'Complete Registration & Issue Pass'}
               </button>

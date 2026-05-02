@@ -6,16 +6,21 @@ import { useRouter } from 'next/navigation';
 import GlassCard from '@/components/GlassCard';
 import { API_BASE, safeJson } from '@/utils/config';
 import { useConfig } from '@/context/ConfigContext';
+import { haptic } from '@/utils/hooks';
 
 export default function LoginPage() {
   const { config: sysConfig } = useConfig();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
+    haptic('medium');
     try {
       const res = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
@@ -24,6 +29,8 @@ export default function LoginPage() {
       });
       const data = await safeJson(res);
       if (!res.ok || data.error) throw new Error(data.error || 'Login failed');
+      
+      haptic('success');
       localStorage.setItem('token', data.token);
       localStorage.setItem('role', data.role);
       localStorage.setItem('name', data.name);
@@ -33,7 +40,12 @@ export default function LoginPage() {
       if (data.role === 'ADMIN') router.push('/admin');
       else if (data.role === 'GUARD') router.push('/guard');
       else router.push('/host');
-    } catch (err) { setError(err.message); }
+    } catch (err) { 
+      setError(err.message); 
+      haptic('error');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -45,10 +57,12 @@ export default function LoginPage() {
         </div>
         <form onSubmit={handleLogin} style={{ width: '100%' }}>
           <div className="apple-input-group-vertical">
-            <input type="email" placeholder="Email Address" required value={email} onChange={e => setEmail(e.target.value)} />
-            <input type="password" placeholder="Password" required value={password} onChange={e => setPassword(e.target.value)} />
+            <input type="email" placeholder="Email Address" required value={email} onChange={e => setEmail(e.target.value)} disabled={loading} />
+            <input type="password" placeholder="Password" required value={password} onChange={e => setPassword(e.target.value)} disabled={loading} />
           </div>
-          <button type="submit" className="apple-btn-primary full-width" style={{ marginTop: '1.5rem' }}>Secure Sign In</button>
+          <button type="submit" className="apple-btn-primary full-width" style={{ marginTop: '1.5rem' }} disabled={loading}>
+            {loading ? 'Authenticating...' : 'Secure Sign In'}
+          </button>
         </form>
         {error && <p className="error-text" style={{ textAlign: 'center' }}>{error}</p>}
         <div style={{ marginTop: '2.5rem', textAlign: 'center' }}>

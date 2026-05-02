@@ -2,34 +2,50 @@
 
 import React, { useState, useRef, useCallback } from 'react';
 import Webcam from 'react-webcam';
+import Tesseract from 'tesseract.js';
 
-function CameraCapture({ onCapture, existingImage = null }) {
+function CameraCapture({ onCapture, onOCR = null, existingImage = null }) {
   const webcamRef = useRef(null);
   const [isCamera, setIsCamera] = useState(false);
   const [capturedImg, setCapturedImg] = useState(existingImage);
+  const [isProcessing, setIsProcessing] = useState(false);
   
-  const capture = useCallback(() => {
-    const imageSrc = webcamRef.current.getScreenshot();
-    
-    // Bug 5 fix: Compress/Resize image using canvas
+  const processImage = (imageSrc) => {
     const img = new Image();
     img.src = imageSrc;
-    img.onload = () => {
+    img.onload = async () => {
       const canvas = document.createElement('canvas');
-      const MAX_WIDTH = 400; // Limit size to save DB space
+      const MAX_WIDTH = 600; // slightly wider for better OCR
       const scale = MAX_WIDTH / img.width;
       canvas.width = MAX_WIDTH;
       canvas.height = img.height * scale;
       
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      const compressed = canvas.toDataURL('image/jpeg', 0.7); // 70% quality
+      const compressed = canvas.toDataURL('image/jpeg', 0.8);
       setCapturedImg(compressed);
       onCapture(compressed);
+
+      // OCR Processing
+      if (onOCR) {
+        setIsProcessing(true);
+        try {
+          const { data: { text } } = await Tesseract.recognize(compressed, 'eng');
+          onOCR(text);
+        } catch (err) {
+          console.error('OCR Error:', err);
+        } finally {
+          setIsProcessing(false);
+        }
+      }
     };
-    
+  };
+
+  const capture = useCallback(() => {
+    const imageSrc = webcamRef.current.getScreenshot();
+    if (imageSrc) processImage(imageSrc);
     setIsCamera(false);
-  }, [webcamRef, onCapture]);
+  }, [webcamRef, onCapture, onOCR]);
 
   const retake = () => {
     setCapturedImg(null);
@@ -40,7 +56,14 @@ function CameraCapture({ onCapture, existingImage = null }) {
   if (capturedImg) {
     return (
       <div className="camera-comp-glass captured-state">
-        <img src={capturedImg} alt="Captured" style={{ width: '100%', borderRadius: '20px', marginBottom: '1rem' }} />
+        <div style={{ position: 'relative' }}>
+          <img src={capturedImg} alt="Captured" style={{ width: '100%', borderRadius: '20px', marginBottom: '1rem', opacity: isProcessing ? 0.6 : 1 }} />
+          {isProcessing && (
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div className="skeleton" style={{ width: '80%', height: '20px' }}></div>
+            </div>
+          )}
+        </div>
         <button type="button" onClick={retake} className="apple-btn-secondary full-width">Retake Photo</button>
       </div>
     );
@@ -62,20 +85,7 @@ function CameraCapture({ onCapture, existingImage = null }) {
           if (!file) return;
           const reader = new FileReader();
           reader.onloadend = () => {
-            const img = new Image();
-            img.onload = () => {
-              const canvas = document.createElement('canvas');
-              const MAX_WIDTH = 400;
-              const scaleSize = MAX_WIDTH / img.width;
-              canvas.width = MAX_WIDTH;
-              canvas.height = img.height * scaleSize;
-              const ctx = canvas.getContext('2d');
-              ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-              const compressed = canvas.toDataURL('image/jpeg', 0.7);
-              setCapturedImg(compressed);
-              onCapture(compressed);
-            };
-            img.src = reader.result;
+            processImage(reader.result);
           };
           reader.readAsDataURL(file);
         }} />
