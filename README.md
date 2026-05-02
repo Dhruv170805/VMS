@@ -55,7 +55,7 @@ Refer to the [System Architecture Documentation](./docs/ARCHITECTURE.md) for a d
 
 3. **Frontend Setup**
    ```bash
-   cd ../frontend
+   cd ../my-app
    npm install
    # Create .env.local with NEXT_PUBLIC_API_BASE
    npm run dev
